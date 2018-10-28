@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>PaxosCommit</name>
+	<name>monitor</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -16,14 +16,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>PaxosCommit.tla</name>
+			<name>monitor.tla</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/PaxosCommit.tla</locationURI>
-		</link>
-		<link>
-			<name>TCommit.tla</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/TCommit.tla</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/monitor.tla</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
