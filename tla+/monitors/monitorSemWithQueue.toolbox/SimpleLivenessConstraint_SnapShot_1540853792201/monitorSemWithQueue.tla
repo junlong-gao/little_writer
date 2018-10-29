@@ -265,12 +265,12 @@ MSemQSpec ==
 
 MonitorSpec == INSTANCE monitor
 
-(*
+
 CVSignalFairness == MonitorSpec!CVSignalFairness
 
-THEOREM MSemSpec => MonitorSpec!MSpec
-*)
+THEOREM MSemQSpec => MonitorSpec!MSpec
+
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 15:54:32 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 15:55:49 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg

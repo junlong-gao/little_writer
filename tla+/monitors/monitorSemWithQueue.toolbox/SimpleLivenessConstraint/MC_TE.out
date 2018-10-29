@@ -2,18 +2,18 @@
 TLC2 Version 2.13 of 18 July 2018
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with seed -5962443510059589312 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14 x86_64, Oracle Corporation 1.8.0_131 x86_64).
+Running breadth-first search Model-Checking with seed 8730210119158076076 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14 x86_64, Oracle Corporation 1.8.0_131 x86_64).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
 @!@!@ENDMSG 2220 @!@!@
-Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorSemWithQueue.toolbox/SimpleInvariantCheck/MC.tla
-Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorSemWithQueue.toolbox/SimpleInvariantCheck/monitorSemWithQueue.tla
+Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorSemWithQueue.toolbox/SimpleLivenessConstraint/MC.tla
+Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorSemWithQueue.toolbox/SimpleLivenessConstraint/monitorSemWithQueue.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/TLC.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/Integers.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/Sequences.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/Naturals.tla
-Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorSemWithQueue.toolbox/SimpleInvariantCheck/monitor.tla
+Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorSemWithQueue.toolbox/SimpleLivenessConstraint/monitor.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/FiniteSets.tla
 Semantic processing of module Naturals
 Semantic processing of module Integers
@@ -27,14 +27,26 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2018-10-29 15:54:55)
+Starting... (2018-10-29 15:57:15)
 @!@!@ENDMSG 2185 @!@!@
+@!@!@STARTMSG 2212:0 @!@!@
+Implied-temporal checking--satisfiability problem has 2 branches.
+@!@!@ENDMSG 2212 @!@!@
 @!@!@STARTMSG 2189:0 @!@!@
 Computing initial states...
 @!@!@ENDMSG 2189 @!@!@
 @!@!@STARTMSG 2190:0 @!@!@
 Finished computing initial states: 1 distinct state generated.
 @!@!@ENDMSG 2190 @!@!@
+@!@!@STARTMSG 2200:0 @!@!@
+Progress(9) at 2018-10-29 15:57:16: 60 states generated, 32 distinct states found, 0 states left on queue.
+@!@!@ENDMSG 2200 @!@!@
+@!@!@STARTMSG 2192:0 @!@!@
+Checking 2 branches of temporal properties for the complete state space with 64 total distinct states at (2018-10-29 15:57:16)
+@!@!@ENDMSG 2192 @!@!@
+@!@!@STARTMSG 2267:0 @!@!@
+Finished checking temporal properties in 00s at 2018-10-29 15:57:16
+@!@!@ENDMSG 2267 @!@!@
 @!@!@STARTMSG 2193:0 @!@!@
 Model checking completed. No error has been found.
   Estimates of the probability that TLC did not check all reachable states
@@ -43,7 +55,7 @@ Model checking completed. No error has been found.
   based on the actual fingerprints:  val = 1.9E-16
 @!@!@ENDMSG 2193 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2018-10-29 15:55:02
+The coverage statistics at 2018-10-29 15:57:22
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   line 147, col 19 to line 147, col 20 of module monitorSemWithQueue: 10
@@ -157,7 +169,7 @@ The coverage statistics at 2018-10-29 15:55:02
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(9) at 2018-10-29 15:55:02: 60 states generated (514 s/min), 32 distinct states found (274 ds/min), 0 states left on queue.
+Progress(9) at 2018-10-29 15:57:22: 60 states generated (537 s/min), 32 distinct states found (286 ds/min), 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
 60 states generated, 32 distinct states found, 0 states left on queue.
@@ -166,8 +178,8 @@ Progress(9) at 2018-10-29 15:55:02: 60 states generated (514 s/min), 32 distinct
 The depth of the complete state graph search is 9.
 @!@!@ENDMSG 2194 @!@!@
 @!@!@STARTMSG 2268:0 @!@!@
-The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 3 and the 95th percentile is 2).
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 2 and the 95th percentile is 2).
 @!@!@ENDMSG 2268 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 7433ms at (2018-10-29 15:55:02)
+Finished in 7096ms at (2018-10-29 15:57:22)
 @!@!@ENDMSG 2186 @!@!@
