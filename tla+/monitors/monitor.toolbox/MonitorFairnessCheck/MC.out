@@ -2,7 +2,7 @@
 TLC2 Version 2.13 of 18 July 2018
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with seed -5743843514311108361 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
+Running breadth-first search Model-Checking with seed -1660036316774709833 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
@@ -23,7 +23,7 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2018-10-28 23:47:28)
+Starting... (2018-10-29 01:43:35)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2212:0 @!@!@
 Implied-temporal checking--satisfiability problem has 2 branches.
@@ -35,13 +35,13 @@ Computing initial states...
 Finished computing initial states: 1 distinct state generated.
 @!@!@ENDMSG 2190 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(8) at 2018-10-28 23:47:29: 70 states generated, 23 distinct states found, 0 states left on queue.
+Progress(8) at 2018-10-29 01:43:36: 70 states generated, 23 distinct states found, 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2192:0 @!@!@
-Checking 2 branches of temporal properties for the complete state space with 46 total distinct states at (2018-10-28 23:47:29)
+Checking 2 branches of temporal properties for the complete state space with 46 total distinct states at (2018-10-29 01:43:36)
 @!@!@ENDMSG 2192 @!@!@
 @!@!@STARTMSG 2267:0 @!@!@
-Finished checking temporal properties in 00s at 2018-10-28 23:47:29
+Finished checking temporal properties in 00s at 2018-10-29 01:43:36
 @!@!@ENDMSG 2267 @!@!@
 @!@!@STARTMSG 2193:0 @!@!@
 Model checking completed. No error has been found.
@@ -51,7 +51,7 @@ Model checking completed. No error has been found.
   based on the actual fingerprints:  val = 2.3E-17
 @!@!@ENDMSG 2193 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2018-10-28 23:47:34
+The coverage statistics at 2018-10-29 01:43:41
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   line 129, col 11 to line 130, col 57 of module monitor: 7
@@ -99,7 +99,7 @@ The coverage statistics at 2018-10-28 23:47:34
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(8) at 2018-10-28 23:47:34: 70 states generated (660 s/min), 23 distinct states found (216 ds/min), 0 states left on queue.
+Progress(8) at 2018-10-29 01:43:41: 70 states generated (706 s/min), 23 distinct states found (232 ds/min), 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
 70 states generated, 23 distinct states found, 0 states left on queue.
@@ -111,5 +111,5 @@ The depth of the complete state graph search is 8.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 2 and the 95th percentile is 2).
 @!@!@ENDMSG 2268 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 6659ms at (2018-10-28 23:47:34)
+Finished in 6292ms at (2018-10-29 01:43:41)
 @!@!@ENDMSG 2186 @!@!@

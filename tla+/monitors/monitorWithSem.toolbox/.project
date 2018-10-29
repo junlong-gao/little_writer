@@ -16,6 +16,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>monitor.tla</name>
+			<type>1</type>
+			<location>/Users/junlongg/little_writer/tla+/monitors/monitor.tla</location>
+		</link>
+		<link>
 			<name>monitorWithSem.tla</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/monitorWithSem.tla</locationURI>

@@ -193,7 +193,7 @@ SignalResolve ==
       /\ Mutex' = [ holder  |-> Mutex.holder,
                     waiters |-> Mutex.waiters \union pickedSubSet ]
       /\ CV' = [ waiters  |-> CV.waiters \ pickedSubSet, 
-                 signaled |-> {} ]
+                 signaled |-> CV.signaled \ pickedSubSet ]
       /\ Sem' = [ counter |-> Sem.counter + reduced,
                   waiters |-> Sem.waiters \ pickedSubSet]
       )
@@ -227,5 +227,5 @@ THEOREM MSemSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 01:54:25 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 01:44:38 PDT 2018 by junlongg
 \* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg

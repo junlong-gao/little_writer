@@ -193,7 +193,7 @@ SignalResolve ==
       /\ Mutex' = [ holder  |-> Mutex.holder,
                     waiters |-> Mutex.waiters \union pickedSubSet ]
       /\ CV' = [ waiters  |-> CV.waiters \ pickedSubSet, 
-                 signaled |-> CV.signaled \ pickedSubSet ]
+                 signaled |-> {} ]
       /\ Sem' = [ counter |-> Sem.counter + reduced,
                   waiters |-> Sem.waiters \ pickedSubSet]
       )
@@ -219,16 +219,13 @@ MSemSpec ==
     /\ [][MSemNext]_<<CV, Mutex, Sem>> 
     /\ WF_<<CV, Mutex, Sem>>(MSemNext)
 
-(*
+MonitorSpec == INSTANCE monitor
 
-CVSignalFairness ==
-    \A t \in THREADS:
-        (t \in CV.signaled) ~> (t \in Mutex.waiters)
+CVSignalFairness == MonitorSpec!CVSignalFairness
 
-THEOREM MSpec => []MonitorTypeInv
-*)
+THEOREM MSemSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 01:37:56 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 01:54:25 PDT 2018 by junlongg
 \* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg

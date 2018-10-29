@@ -7,18 +7,18 @@ t1, t2
 ----
 
 \* MV CONSTANT definitions THREADS
-const_1540795648041234000 == 
+const_1540802614808349000 == 
 {t1, t2}
 ----
 
 \* SPECIFICATION definition @modelBehaviorSpec:0
-spec_1540795648041235000 ==
+spec_1540802614808350000 ==
 MSpec
 ----
 \* PROPERTY definition @modelCorrectnessProperties:0
-prop_1540795648041236000 ==
+prop_1540802614808351000 ==
 CVSignalFairness
 ----
 =============================================================================
 \* Modification History
-\* Created Sun Oct 28 23:47:28 PDT 2018 by junlongg
+\* Created Mon Oct 29 01:43:34 PDT 2018 by junlongg
