@@ -89,7 +89,10 @@ SemWaitAfterCVWaitReg ==
       
 MarkedCVWaiting(t) ==
    t \in CV.waiters
-   
+
+MarkedSignaled ==
+   ~ (CV.signaled = {})
+      
 Blocked(t) ==
    t \in Sem.waiters
    \/ t \in Mutex.waiters
@@ -112,13 +115,14 @@ MSemInit ==
 *)
 Lock(t) ==
     Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) /\ ~MarkedSignaled
     /\ ~(t \in Mutex.holder)
     /\ UNCHANGED<<CV, Sem>>
     /\ Mutex' = [ holder |-> Mutex.holder, waiters |-> Mutex.waiters \union {t} ]
 
 LockResolve ==
    Sem.counter < SEMCOUNT
+   /\ ~MarkedSignaled
    /\ ~(Mutex.waiters = {})
    /\ (Mutex.holder = {})
    /\ LET waiter == CHOOSE waiter \in Mutex.waiters : TRUE
@@ -128,7 +132,7 @@ LockResolve ==
 
 Unlock(t) ==
     Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) /\ ~MarkedSignaled
     /\ Mutex.holder = {t}
     /\ Mutex' = [holder |-> {}, waiters |-> Mutex.waiters]
     /\ UNCHANGED <<CV, Sem>>
@@ -138,7 +142,7 @@ Wait cannot release lock and wait on sem atomically
 *)
 WaitA(t) ==
     Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) /\ ~MarkedSignaled
     /\ Mutex.holder = {t}
     /\ CV' = [ waiters |-> CV.waiters \union {t}, signaled |-> CV.signaled ]
     /\ Mutex' = [ holder |-> {}, waiters |-> Mutex.waiters]
@@ -146,7 +150,7 @@ WaitA(t) ==
     
 WaitB(t) ==
     Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ MarkedCVWaiting(t)
+    /\ ~Blocked(t) /\ MarkedCVWaiting(t) /\ ~MarkedSignaled
     /\ IF Sem.counter > 0
        THEN (
           Sem' = [ counter |-> Sem.counter - 1,
@@ -163,7 +167,8 @@ WaitB(t) ==
 
 Signal(t) ==
        Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)  /\ ~MarkedSignaled
+    /\ Mutex.holder = {t} (* posix does not require that, but... *)
     /\ IF CV.waiters = {}
        THEN (
        UNCHANGED <<CV, Mutex, Sem>>
@@ -177,14 +182,15 @@ Signal(t) ==
 
 Broadcast(t) ==
        Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)  /\ ~MarkedSignaled
+    /\ Mutex.holder = {t} (* posix does not require that, but... *)
     /\ CV' = [ waiters  |-> CV.waiters,
                signaled |-> CV.signaled \union CV.waiters]
     /\ UNCHANGED <<Mutex, Sem>>
           
 SignalResolve ==
          Sem.counter < SEMCOUNT
-      /\ ~ (CV.signaled = {})
+      /\ MarkedSignaled
       /\ (
       LET minVal == MinOfTwoInt(SetSize(Sem.waiters), SetSize(CV.signaled))
       IN LET pickedSubSet == ChooseN(minVal, Sem.waiters)
@@ -227,5 +233,5 @@ THEOREM MSemSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 01:54:25 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 02:21:44 PDT 2018 by junlongg
 \* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg
