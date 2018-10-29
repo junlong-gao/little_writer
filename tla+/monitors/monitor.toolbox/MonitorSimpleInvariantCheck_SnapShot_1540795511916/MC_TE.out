@@ -2,7 +2,7 @@
 TLC2 Version 2.13 of 18 July 2018
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with seed 3594706469382313024 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
+Running breadth-first search Model-Checking with seed 7485217457203110237 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
@@ -23,7 +23,7 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2018-10-28 23:47:14)
+Starting... (2018-10-28 23:45:00)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2189:0 @!@!@
 Computing initial states...
@@ -35,11 +35,11 @@ Finished computing initial states: 1 distinct state generated.
 Model checking completed. No error has been found.
   Estimates of the probability that TLC did not check all reachable states
   because two distinct states had the same fingerprint:
-  calculated (optimistic):  val = 1.8E-17
+  calculated (optimistic):  val = 1.6E-17
   based on the actual fingerprints:  val = 9.5E-18
 @!@!@ENDMSG 2193 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2018-10-28 23:47:21
+The coverage statistics at 2018-10-28 23:45:11
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   line 129, col 11 to line 130, col 57 of module monitor: 4
@@ -72,12 +72,6 @@ The coverage statistics at 2018-10-28 23:47:21
   line 208, col 20 to line 208, col 24 of module monitor: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 229, col 11 to line 230, col 67 of module monitor: 4
-@!@!@ENDMSG 2221 @!@!@
-@!@!@STARTMSG 2221:0 @!@!@
-  line 231, col 11 to line 231, col 74 of module monitor: 4
-@!@!@ENDMSG 2221 @!@!@
-@!@!@STARTMSG 2221:0 @!@!@
   line 93, col 8 to line 93, col 15 of module monitor: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
@@ -87,10 +81,10 @@ The coverage statistics at 2018-10-28 23:47:21
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(8) at 2018-10-28 23:47:21: 39 states generated (346 s/min), 13 distinct states found (115 ds/min), 0 states left on queue.
+Progress(8) at 2018-10-28 23:45:11: 35 states generated (196 s/min), 13 distinct states found (73 ds/min), 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
-39 states generated, 13 distinct states found, 0 states left on queue.
+35 states generated, 13 distinct states found, 0 states left on queue.
 @!@!@ENDMSG 2199 @!@!@
 @!@!@STARTMSG 2194:0 @!@!@
 The depth of the complete state graph search is 8.
@@ -99,5 +93,5 @@ The depth of the complete state graph search is 8.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 2 and the 95th percentile is 2).
 @!@!@ENDMSG 2268 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 7044ms at (2018-10-28 23:47:21)
+Finished in 11028ms at (2018-10-28 23:45:11)
 @!@!@ENDMSG 2186 @!@!@

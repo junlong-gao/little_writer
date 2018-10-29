@@ -235,7 +235,6 @@ MNext describes how system may evolve given any current state.
 *)
 MNext ==
     LockResolve
-    \/ SignalResolve
     \/ \E t \in THREADS :
        \/ Lock(t)
        \/ Wait(t)
@@ -266,5 +265,5 @@ CVSignalFairness ==
 THEOREM MSpec => []MonitorTypeInv
 =============================================================================
 \* Modification History
-\* Last modified Sun Oct 28 23:47:14 PDT 2018 by junlongg
+\* Last modified Sun Oct 28 23:16:45 PDT 2018 by junlongg
 \* Created Sun Oct 28 16:06:17 PDT 2018 by junlongg

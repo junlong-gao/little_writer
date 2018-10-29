@@ -17,7 +17,7 @@ CV is modeled as two sets, first being the waiters and the second
 being the signaled.
 *)
 VARIABLE CV
-CVDomain == 
+CVDomain ==
     DOMAIN CV = {"waiters", "signaled"}
 
 (*
@@ -28,7 +28,7 @@ a not waiting thread has no effects for future wait.
 *)
 CVMemoryLess ==
    CV.signaled \subseteq CV.waiters
-   
+
 (*
 Monitors only move threads around, not duplicating them.
 *)
@@ -48,8 +48,8 @@ This is the invariant of the monitors,
 which is the conjuction of the above 4 invariants
 *)
 MonitorTypeInv ==
-       CVDomain /\ CVMemoryLess 
-    /\ MutexDomain /\ MutualExclusion 
+       CVDomain /\ CVMemoryLess
+    /\ MutexDomain /\ MutualExclusion
     /\ MonitorConservative
 
 (* Init states *)
@@ -157,7 +157,7 @@ Unlock(t) ==
 
    Next step:
    Atomically move t from holder to CV. (!!)
-   
+
    This step implies, if some thread appears in the CV wait set, then
    we can conclude there exists some previous state, where this thread
    called Wait, but not yet woken up by some signal. We attach this semantics
@@ -186,7 +186,7 @@ Signal(t) ==
        UNCHANGED <<CV, Mutex>>
        ELSE
        LET waiter == CHOOSE waiter \in CV.waiters : TRUE
-       IN    CV' = [ waiters  |-> CV.waiters, 
+       IN    CV' = [ waiters  |-> CV.waiters,
                      signaled |-> CV.signaled \union { waiter }]
           /\ UNCHANGED <<Mutex>>
 
@@ -206,15 +206,15 @@ Broadcast(t) ==
     /\ CV' = [ waiters  |-> CV.waiters,
                signaled |-> CV.signaled \union CV.waiters]
     /\ UNCHANGED <<Mutex>>
-                 
+
 (*
 This is added to allow us to express the fact that
 "A thread waited in some state and then is signaled in some state by another thread".
 
 In POSIX, there is no requirement on whether the signaled thread should immediately
-get lock or appear in some position in the lock queue (Mesa semantics). A signalled 
-thread cannot put itself on wait again before it is resolved from sleeping (woken) 
-and attempts to get the lock. Therefore, it is allowed to have some delay between 
+get lock or appear in some position in the lock queue (Mesa semantics). A signalled
+thread cannot put itself on wait again before it is resolved from sleeping (woken)
+and attempts to get the lock. Therefore, it is allowed to have some delay between
 getting signaled and being put on lock's wait set.
 
 Enabling condition:
@@ -223,18 +223,19 @@ signaled set not empty
 Step:
 Remove these signaled from waiters in CV and put them
 into waiters of Lock.
-*)          
+*)
 SignalResolve ==
       ~ (CV.signaled = {})
       /\  Mutex' = [ holder  |-> Mutex.holder,
                      waiters |-> Mutex.waiters \union CV.signaled ]
       /\  CV' = [ waiters |-> CV.waiters \  CV.signaled, signaled |-> {} ]
-      
+
 (*
 MNext describes how system may evolve given any current state.
 *)
 MNext ==
     LockResolve
+    \/ SignalResolve
     \/ \E t \in THREADS :
        \/ Lock(t)
        \/ Wait(t)
@@ -253,11 +254,11 @@ This is one of the non-trivial liveness property any monitor spec must satisfy.
 If some thread waited and then is signaled, it must eventually wake up and try to
 acquire the lock again.
 
-Monitor provides this fundamental guarantee so that different threads can 
+Monitor provides this fundamental guarantee so that different threads can
 use these monitors to communicate each other like:
 T1: wait() on some condition
-T2: change the condition and communicate to T1 via signal()/broadcast(). 
-*)    
+T2: change the condition and communicate to T1 via signal()/broadcast().
+*)
 CVSignalFairness ==
     \A t \in THREADS:
         (t \in CV.signaled) ~> (t \in Mutex.waiters)
@@ -265,5 +266,5 @@ CVSignalFairness ==
 THEOREM MSpec => []MonitorTypeInv
 =============================================================================
 \* Modification History
-\* Last modified Sun Oct 28 23:16:45 PDT 2018 by junlongg
+\* Last modified Sun Oct 28 23:47:14 PDT 2018 by junlongg
 \* Created Sun Oct 28 16:06:17 PDT 2018 by junlongg
