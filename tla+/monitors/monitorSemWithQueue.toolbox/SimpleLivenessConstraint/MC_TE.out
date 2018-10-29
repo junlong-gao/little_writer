@@ -2,7 +2,7 @@
 TLC2 Version 2.13 of 18 July 2018
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with seed 8730210119158076076 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14 x86_64, Oracle Corporation 1.8.0_131 x86_64).
+Running breadth-first search Model-Checking with seed 4145415881867513658 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14 x86_64, Oracle Corporation 1.8.0_131 x86_64).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
@@ -27,7 +27,7 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2018-10-29 15:57:15)
+Starting... (2018-10-29 16:23:07)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2212:0 @!@!@
 Implied-temporal checking--satisfiability problem has 2 branches.
@@ -39,23 +39,23 @@ Computing initial states...
 Finished computing initial states: 1 distinct state generated.
 @!@!@ENDMSG 2190 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(9) at 2018-10-29 15:57:16: 60 states generated, 32 distinct states found, 0 states left on queue.
+Progress(10) at 2018-10-29 16:23:08: 74 states generated, 38 distinct states found, 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2192:0 @!@!@
-Checking 2 branches of temporal properties for the complete state space with 64 total distinct states at (2018-10-29 15:57:16)
+Checking 2 branches of temporal properties for the complete state space with 76 total distinct states at (2018-10-29 16:23:08)
 @!@!@ENDMSG 2192 @!@!@
 @!@!@STARTMSG 2267:0 @!@!@
-Finished checking temporal properties in 00s at 2018-10-29 15:57:16
+Finished checking temporal properties in 00s at 2018-10-29 16:23:08
 @!@!@ENDMSG 2267 @!@!@
 @!@!@STARTMSG 2193:0 @!@!@
 Model checking completed. No error has been found.
   Estimates of the probability that TLC did not check all reachable states
   because two distinct states had the same fingerprint:
-  calculated (optimistic):  val = 4.9E-17
+  calculated (optimistic):  val = 7.4E-17
   based on the actual fingerprints:  val = 1.9E-16
 @!@!@ENDMSG 2193 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2018-10-29 15:57:22
+The coverage statistics at 2018-10-29 16:23:15
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   line 147, col 19 to line 147, col 20 of module monitorSemWithQueue: 10
@@ -82,104 +82,104 @@ The coverage statistics at 2018-10-29 15:57:22
   line 156, col 29 to line 156, col 42 of module monitorSemWithQueue: 7
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 173, col 8 to line 174, col 44 of module monitorSemWithQueue: 8
+  line 173, col 8 to line 174, col 44 of module monitorSemWithQueue: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 175, col 8 to line 176, col 44 of module monitorSemWithQueue: 8
+  line 175, col 8 to line 176, col 44 of module monitorSemWithQueue: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 177, col 8 to line 177, col 29 of module monitorSemWithQueue: 8
+  line 177, col 8 to line 177, col 29 of module monitorSemWithQueue: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 178, col 8 to line 178, col 64 of module monitorSemWithQueue: 8
+  line 178, col 8 to line 178, col 64 of module monitorSemWithQueue: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 189, col 14 to line 190, col 47 of module monitorSemWithQueue: 0
+  line 190, col 14 to line 191, col 47 of module monitorSemWithQueue: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 191, col 14 to line 192, col 62 of module monitorSemWithQueue: 0
+  line 192, col 14 to line 193, col 62 of module monitorSemWithQueue: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 193, col 14 to line 193, col 93 of module monitorSemWithQueue: 0
+  line 194, col 14 to line 194, col 93 of module monitorSemWithQueue: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 194, col 25 to line 194, col 28 of module monitorSemWithQueue: 0
+  line 195, col 25 to line 195, col 28 of module monitorSemWithQueue: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 198, col 14 to line 202, col 32 of module monitorSemWithQueue: 14
+  line 199, col 14 to line 203, col 32 of module monitorSemWithQueue: 16
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 203, col 25 to line 203, col 29 of module monitorSemWithQueue: 14
+  line 204, col 25 to line 204, col 29 of module monitorSemWithQueue: 16
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 203, col 32 to line 203, col 33 of module monitorSemWithQueue: 14
+  line 204, col 32 to line 204, col 33 of module monitorSemWithQueue: 16
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 203, col 36 to line 203, col 39 of module monitorSemWithQueue: 14
+  line 204, col 36 to line 204, col 39 of module monitorSemWithQueue: 16
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 212, col 24 to line 212, col 25 of module monitorSemWithQueue: 4
+  line 213, col 24 to line 213, col 25 of module monitorSemWithQueue: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 212, col 28 to line 212, col 32 of module monitorSemWithQueue: 4
+  line 213, col 28 to line 213, col 32 of module monitorSemWithQueue: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 212, col 35 to line 212, col 38 of module monitorSemWithQueue: 4
+  line 213, col 35 to line 213, col 38 of module monitorSemWithQueue: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 212, col 41 to line 212, col 54 of module monitorSemWithQueue: 4
+  line 213, col 41 to line 213, col 54 of module monitorSemWithQueue: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 216, col 15 to line 217, col 64 of module monitorSemWithQueue: 4
+  line 217, col 15 to line 218, col 64 of module monitorSemWithQueue: 4
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 219, col 29 to line 219, col 33 of module monitorSemWithQueue: 4
+  line 220, col 29 to line 220, col 33 of module monitorSemWithQueue: 4
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 219, col 36 to line 219, col 39 of module monitorSemWithQueue: 4
+  line 220, col 36 to line 220, col 39 of module monitorSemWithQueue: 4
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 219, col 42 to line 219, col 55 of module monitorSemWithQueue: 4
+  line 220, col 42 to line 220, col 55 of module monitorSemWithQueue: 4
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 225, col 8 to line 226, col 78 of module monitorSemWithQueue: 8
+  line 226, col 8 to line 227, col 78 of module monitorSemWithQueue: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 227, col 20 to line 227, col 24 of module monitorSemWithQueue: 8
+  line 228, col 20 to line 228, col 24 of module monitorSemWithQueue: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 227, col 27 to line 227, col 30 of module monitorSemWithQueue: 8
+  line 228, col 27 to line 228, col 30 of module monitorSemWithQueue: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 227, col 33 to line 227, col 46 of module monitorSemWithQueue: 8
+  line 228, col 33 to line 228, col 46 of module monitorSemWithQueue: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 233, col 10 to line 234, col 34 of module monitorSemWithQueue: 4
+  line 235, col 13 to line 236, col 37 of module monitorSemWithQueue: 4
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 235, col 10 to line 235, col 49 of module monitorSemWithQueue: 4
+  line 237, col 16 to line 237, col 55 of module monitorSemWithQueue: 4
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 236, col 10 to line 242, col 29 of module monitorSemWithQueue: 4
+  line 238, col 16 to line 250, col 29 of module monitorSemWithQueue: 4
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 243, col 10 to line 244, col 65 of module monitorSemWithQueue: 4
+  line 251, col 10 to line 252, col 72 of module monitorSemWithQueue: 4
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2202:0 @!@!@
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(9) at 2018-10-29 15:57:22: 60 states generated (537 s/min), 32 distinct states found (286 ds/min), 0 states left on queue.
+Progress(10) at 2018-10-29 16:23:15: 74 states generated (599 s/min), 38 distinct states found (307 ds/min), 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
-60 states generated, 32 distinct states found, 0 states left on queue.
+74 states generated, 38 distinct states found, 0 states left on queue.
 @!@!@ENDMSG 2199 @!@!@
 @!@!@STARTMSG 2194:0 @!@!@
-The depth of the complete state graph search is 9.
+The depth of the complete state graph search is 10.
 @!@!@ENDMSG 2194 @!@!@
 @!@!@STARTMSG 2268:0 @!@!@
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 2 and the 95th percentile is 2).
 @!@!@ENDMSG 2268 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 7096ms at (2018-10-29 15:57:22)
+Finished in 7900ms at (2018-10-29 16:23:15)
 @!@!@ENDMSG 2186 @!@!@

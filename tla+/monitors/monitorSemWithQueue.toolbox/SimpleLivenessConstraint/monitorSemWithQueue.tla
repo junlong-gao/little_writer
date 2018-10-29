@@ -100,9 +100,9 @@ MonitorConservative ==
           /\ ( Mutex.waiters \intersect ThreadLocalSem[t].waiters = {} )
           /\ ( Mutex.holder \intersect ThreadLocalSem[t].waiters = {} )
    )
-   (* the size of the semaphore queue is the same as the size of threads
+   (* the size of the semaphore queue no larger than the size of threads
       registered for CV wait *)
-   /\ SetSize(CV.waiters) = Len(SemQ)
+   /\ (Len(SemQ) < SetSize(CV.waiters) \/ Len(SemQ) = SetSize(CV.waiters))
    
    (* and those that are physically blocked by semaphore is a subset
       of the threads registered for CV wait
@@ -183,7 +183,8 @@ WaitB(t) ==
     /\ LET localSem == ThreadLocalSem[t]
        IN
        IF localSem.counter > 0
-       (* if the sem counter is pos, down immediately gets unblocked and gets put into mutex
+       (* if the sem counter is pos (a signal has already resolved this thread,
+          sem.down immediately gets unblocked and gets put into mutex
           queue *)
        THEN (
              CV' = [ waiters  |-> CV.waiters \ {t}, 
@@ -230,18 +231,25 @@ Broadcast(t) ==
              
 SignalResolve ==
          MarkedSignaled
-      /\ CV' = [ waiters  |-> CV.waiters \ CV.signaled, 
-                 signaled |-> {} ]
-      /\ SemQ' = PopN(SetSize(CV.signaled), SemQ)
-      /\ ThreadLocalSem' = [ t \in THREADS |-> 
-                                IF t \in CV.signaled 
+      /\ LET physically_blocked == { t \in THREADS : t \in CV.signaled /\ t \in ThreadLocalSem[t].waiters }
+         IN CV' = [ waiters  |-> CV.waiters \ physically_blocked, 
+                    signaled |-> {} ]
+            /\ SemQ' = PopN(SetSize(CV.signaled), SemQ)
+            /\ ThreadLocalSem' = [ t \in THREADS |-> 
+                                   IF t \in CV.signaled 
                                 THEN 
-                                  [ counter |-> 0,
-                                    waiters |-> {} ]
+                                   (IF ThreadLocalSem[t].waiters = {}
+                                    THEN 
+                                    [ counter |-> 1,
+                                      waiters |-> {} ]
+                                    ELSE
+                                    [ counter |-> 0,
+                                      waiters |-> {} ]
+                                    )
                                 ELSE ThreadLocalSem[t]
                             ]
       /\ Mutex' = [ holder |-> Mutex.holder,
-                    waiters |-> Mutex.waiters \union CV.signaled]
+                    waiters |-> Mutex.waiters \union physically_blocked]
 
 (*
 MNext describes how system may evolve given any current state.
@@ -271,5 +279,5 @@ THEOREM MSemQSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 15:56:54 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 16:21:39 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg
