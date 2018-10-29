@@ -22,10 +22,10 @@
 <stringAttribute key="modelBehaviorVars" value="msgs, rmState, tmState, tmPrepared"/>
 <stringAttribute key="modelComments" value="This is a simple model to check that two phase commit protocol maintains the invariant TPTypeOK for simple 3 RMs."/>
 <booleanAttribute key="modelCorrectnessCheckDeadlock" value="false"/>
-<listAttribute key="modelCorrectnessInvariants">
-<listEntry value="1TPTypeOK"/>
+<listAttribute key="modelCorrectnessInvariants"/>
+<listAttribute key="modelCorrectnessProperties">
+<listEntry value="1[]TPTypeOK"/>
 </listAttribute>
-<listAttribute key="modelCorrectnessProperties"/>
 <stringAttribute key="modelExpressionEval" value=""/>
 <stringAttribute key="modelParameterActionConstraint" value=""/>
 <listAttribute key="modelParameterConstants">

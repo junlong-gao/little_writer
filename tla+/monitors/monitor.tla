@@ -12,14 +12,14 @@ MutualExclusion ==
       Mutex.holder = {}
    \/ \E t \in THREADS : Mutex.holder = {t}
 
-(* 
+(*
 A cv is modeled as a set of waiting threads.
 *)
 VARIABLE CV
 CVWaitingSet ==
     CV \subseteq THREADS
 
-(* 
+(*
 Monitors only move threads around, not duplicating them.
 *)
 MonitorConservative ==
@@ -28,9 +28,9 @@ MonitorConservative ==
    /\ ( Mutex.waiters \intersect Mutex.holder = {} )
    /\ ( Mutex.waiters \intersect CV = {} /\  Mutex.holder \intersect CV = {})
 
-(* 
-This is the invariant of the monitors, 
-which is the conjuction of the above 4 invariants 
+(*
+This is the invariant of the monitors,
+which is the conjuction of the above 4 invariants
 *)
 MonitorTypeInv ==
     CVWaitingSet /\ MutexDomain /\ MutualExclusion /\ MonitorConservative
@@ -42,7 +42,7 @@ MInit ==
 
 (* What states are we interested in? *)
 
-(* 
+(*
 A thread is blocked if it appears in either of the waiting sets
 
 The negation of it is used as a part of the enabling condition.
@@ -62,13 +62,14 @@ Blocked(t) ==
 
 (*
 - Lock(t) where t is in threads
-   Enabling condition
-   1. not Blocked(t):
+   Enabling condition:
+   1. not Blocked(t).
    2. t is not the current lock holder
-    
+
+   Next step:
    Add t to the waiters set. This is the relaxed locking semantics (still correct, but
    allows to express more subtle states in real world). See LockResolve step below.
-  *)
+*)
 Lock(t) ==
     ~Blocked(t)
     /\ ~(t \in Mutex["holder"])
@@ -97,21 +98,21 @@ Lock(t) ==
 
      This is another reason why putting mutex and CV together as monitors makes a
      more realistic model.
-     
+
      Enabling condition:
      There are some waiters and no holder of the lock.
-     
+
      Next step:
      Pick anyone to become the holder of the lock and remove it from waiter queue.
 *)
 LockResolve ==
    ~(Mutex["waiters"] = {})
    /\ (Mutex["holder"] = {})
-   /\ LET waiter == CHOOSE waiter \in Mutex["waiters"] : TRUE  
-      IN  Mutex' = [holder |-> {waiter}, 
-                   waiters |-> Mutex["waiters"] \ {waiter}]        
+   /\ LET waiter == CHOOSE waiter \in Mutex["waiters"] : TRUE
+      IN  Mutex' = [holder |-> {waiter},
+                   waiters |-> Mutex["waiters"] \ {waiter}]
    /\ UNCHANGED <<CV>>
-   
+
 (*
 - Unlock(t) where t is in threads
    Enabling condition:
@@ -158,14 +159,14 @@ Wait(t) ==
 *)
 Signal(t) ==
     ~Blocked(t)
-    /\ IF CV = {} 
+    /\ IF CV = {}
        THEN
        UNCHANGED <<CV, Mutex>>
        ELSE
-       LET waiter == CHOOSE waiter \in CV : TRUE   
+       LET waiter == CHOOSE waiter \in CV : TRUE
        IN    CV' = CV \ {waiter}
-          /\ Mutex' = [holder |-> Mutex["holder"], 
-                       waiters |-> Mutex["waiters"] \union { waiter }]                                     
+          /\ Mutex' = [holder |-> Mutex["holder"],
+                       waiters |-> Mutex["waiters"] \union { waiter }]
 
 (*
 - Broadcast(t)
@@ -194,7 +195,11 @@ MNext ==
        \/ Signal(t)
        \/ Broadcast(t)
 
+MSpec ==
+    MInit /\ [][MNext]_<<CV, Mutex>>
+
+THEOREM MSpec => []MonitorTypeInv
 =============================================================================
 \* Modification History
-\* Last modified Sun Oct 28 20:41:33 PDT 2018 by junlongg
+\* Last modified Sun Oct 28 20:57:11 PDT 2018 by junlongg
 \* Created Sun Oct 28 16:06:17 PDT 2018 by junlongg

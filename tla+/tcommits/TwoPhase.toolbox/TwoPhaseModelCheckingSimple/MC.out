@@ -2,7 +2,7 @@
 TLC2 Version 2.13 of 18 July 2018
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with seed -1193952028857484027 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
+Running breadth-first search Model-Checking with seed 9152517205364152892 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
@@ -25,7 +25,7 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2018-10-28 20:07:39)
+Starting... (2018-10-28 20:54:36)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2189:0 @!@!@
 Computing initial states...
@@ -41,7 +41,7 @@ Model checking completed. No error has been found.
   based on the actual fingerprints:  val = 6.5E-16
 @!@!@ENDMSG 2193 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2018-10-28 20:07:46
+The coverage statistics at 2018-10-28 20:54:42
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   line 100, col 18 to line 100, col 24 of module TwoPhase: 20
@@ -131,7 +131,7 @@ The coverage statistics at 2018-10-28 20:07:46
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(11) at 2018-10-28 20:07:46: 318 states generated (2,933 s/min), 80 distinct states found (738 ds/min), 0 states left on queue.
+Progress(11) at 2018-10-28 20:54:42: 318 states generated (2,958 s/min), 80 distinct states found (744 ds/min), 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
 318 states generated, 80 distinct states found, 0 states left on queue.
@@ -143,5 +143,5 @@ The depth of the complete state graph search is 11.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 3 and the 95th percentile is 3).
 @!@!@ENDMSG 2268 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 6845ms at (2018-10-28 20:07:46)
+Finished in 6800ms at (2018-10-28 20:54:42)
 @!@!@ENDMSG 2186 @!@!@
