@@ -12,49 +12,34 @@ MutualExclusion ==
       Mutex.holder = {}
    \/ \E t \in THREADS : Mutex.holder = {t}
 
-(* 
-A cv is modeled as a set of waiting threads.
-*)
+(* a cv is a set of waiting threads *)
 VARIABLE CV
 CVWaitingSet ==
     CV \subseteq THREADS
 
-(* 
-Monitors only move threads around, not duplicating them.
-*)
+(* Monitor only moves threads around, not duplicating them *)
 MonitorConservative ==
       Mutex.holder \subseteq THREADS
    /\ Mutex.waiters \subseteq THREADS
    /\ ( Mutex.waiters \intersect Mutex.holder = {} )
    /\ ( Mutex.waiters \intersect CV = {} /\  Mutex.holder \intersect CV = {})
 
-(* 
-This is the invariant of the monitors, 
-which is the conjuction of the above 4 invariants 
-*)
+(* this is the invariant the monitors, which is the conjuction of the above 4 invariants *)
 MonitorTypeInv ==
     CVWaitingSet /\ MutexDomain /\ MutualExclusion /\ MonitorConservative
 
-(* Init states *)
+(* init states *)
 MInit ==
         CV = {}
      /\ Mutex = [ holder |-> {}, waiters |-> {}]
 
-(* What states are we interested in? *)
+(* what states are we interested in? *)
+(* A thread is blocked if it appears in either of the waiting sets
 
-(* 
-A thread is blocked if it appears in either of the waiting sets
-
-The negation of it is used as a part of the enabling condition.
-If t is in the mutex waiter or cv waiter, then this is no op since a thread in
-the waiter state cannot  do anything but wait.
-This will naturally leads to deadlock execution if everyone is no longer enabled.
-
-Curiously, we only have one lock in the model, and we do not allow locking
-when the thread is the owner of the lock. Thus we cannot result in this trivial
-deadlock.
-
-Indeed, we have mode interesting properties to check regarding to CV, not mutex.
+   The negation of it is used as a part of the enabling condition.
+   If t is in the mutex waiter or cv waiter, then this is no op since a thread in
+   the waiter state cannot  do anything but wait.
+   This will naturally leads to deadlock execution if everyone is no longer enabled.
 *)
 Blocked(t) ==
    t \in CV
@@ -77,10 +62,10 @@ Lock(t) ==
 
 (*
     This really does not depend on any thread t.
-    If the system has entered the state that there is some waiter for lock and
-    no one is holding it, automatically resolve it to one waiter.
+    If the system as entered the state that there is some waiter for lock and
+    no one is holding it, automatically resolve it to one holder.
 
-    This is required for both lock acquiring and CV signal. For CV signal, we need to be able to
+    This is required for both lock acquire and CV signal. For CV signal, we need to be able to
     express the state where a thread just gets woken up from wait, but not yet become the owner
     of the lock.
     Instead of duplicating the lock logic, we allow a transient state where lock is not held
@@ -95,14 +80,8 @@ Lock(t) ==
      1) Regardless of holder, becomes waiter first,
      2) If/until there is not holder, become holder.
 
-     This is another reason why putting mutex and CV together as monitors makes a
-     more realistic model.
-     
      Enabling condition:
-     There are some waiters and no holder of the lock.
-     
-     Next step:
-     Pick anyone to become the holder of the lock and remove it from waiter queue.
+     There is some waiters and no holder of the lock.
 *)
 LockResolve ==
    ~(Mutex["waiters"] = {})
@@ -111,8 +90,7 @@ LockResolve ==
       IN  Mutex' = [holder |-> {waiter}, 
                    waiters |-> Mutex["waiters"] \ {waiter}]        
    /\ UNCHANGED <<CV>>
-   
-(*
+ (*
 - Unlock(t) where t is in threads
    Enabling condition:
    t is not blocked and is the holder of the lock.
@@ -159,13 +137,13 @@ Wait(t) ==
 Signal(t) ==
     ~Blocked(t)
     /\ IF CV = {} 
-       THEN
-       UNCHANGED <<CV, Mutex>>
+       THEN UNCHANGED <<CV, Mutex>>
        ELSE
        LET waiter == CHOOSE waiter \in CV : TRUE   
        IN    CV' = CV \ {waiter}
-          /\ Mutex' = [holder |-> Mutex["holder"], 
-                       waiters |-> Mutex["waiters"] \union { waiter }]                                     
+          /\ Mutex' = [holder |-> Mutex["holder"], waiters |-> Mutex["waiters"] \union { waiter }]
+                                
+       
 
 (*
 - Broadcast(t)
@@ -180,8 +158,7 @@ Signal(t) ==
 Broadcast(t) ==
     ~Blocked(t)
     /\ CV' = {}
-    /\ Mutex' = [holder |-> Mutex["holder"],
-                 waiters |-> Mutex["waiters"] \union CV]
+    /\ Mutex' = [holder |-> Mutex["holder"], waiters |-> Mutex["waiters"] \union CV]
 
 (*
 MNext describes how system may evolve given any current state.
@@ -196,5 +173,5 @@ MNext ==
 
 =============================================================================
 \* Modification History
-\* Last modified Sun Oct 28 20:41:33 PDT 2018 by junlongg
+\* Last modified Sun Oct 28 20:34:56 PDT 2018 by junlongg
 \* Created Sun Oct 28 16:06:17 PDT 2018 by junlongg
