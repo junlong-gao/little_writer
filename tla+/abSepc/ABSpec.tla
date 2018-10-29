@@ -60,9 +60,9 @@ Inv == (AVar[2] = BVar[2]) => (AVar = BVar)
 (* steps.                                                                  *)
 (***************************************************************************)
 FairSpec == Spec /\ WF_vars(Next) (* <- this is saying we only consider behaviors with
- Next that is non-trivial. It will discard stuttering behaviors.*)
+ Next that is non-trivial. It will discard trivial infinite stuttering behaviors.*)
 =============================================================================
 \* Modification History
-\* Last modified Sun Oct 28 22:14:57 PDT 2018 by junlongg
+\* Last modified Sun Oct 28 23:50:30 PDT 2018 by junlongg
 \* Last modified Wed Oct 18 04:07:37 PDT 2017 by lamport
 \* Created Fri Sep 04 07:08:22 PDT 2015 by lamport
