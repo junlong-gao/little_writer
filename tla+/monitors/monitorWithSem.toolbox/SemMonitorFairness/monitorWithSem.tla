@@ -164,6 +164,7 @@ WaitB(t) ==
 Signal(t) ==
        Sem.counter < SEMCOUNT
     /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ Mutex.holder = {t} (* posix does not require that, but... *)
     /\ IF CV.waiters = {}
        THEN (
        UNCHANGED <<CV, Mutex, Sem>>
@@ -178,6 +179,7 @@ Signal(t) ==
 Broadcast(t) ==
        Sem.counter < SEMCOUNT
     /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ Mutex.holder = {t} (* posix does not require that, but... *)
     /\ CV' = [ waiters  |-> CV.waiters,
                signaled |-> CV.signaled \union CV.waiters]
     /\ UNCHANGED <<Mutex, Sem>>
@@ -227,5 +229,5 @@ THEOREM MSemSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 01:54:25 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 02:12:57 PDT 2018 by junlongg
 \* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg
