@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>AB</name>
+	<name>monitorSemWithQueue</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -16,14 +16,14 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>AB.tla</name>
+			<name>monitor.tla</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/AB.tla</locationURI>
+			<location>/Users/junlongg/little_writer/tla+/monitors/monitor.tla</location>
 		</link>
 		<link>
-			<name>ABSpec.tla</name>
+			<name>monitorSemWithQueue.tla</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/ABSpec.tla</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/monitorSemWithQueue.tla</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
