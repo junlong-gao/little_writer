@@ -1,7 +1,7 @@
 Coq, an interactive theorem prover.
 
-   Use coqc for batch compilation against each module.
+   Use coqc for batch compilation against each module in the /coq dir.
 
-TLA+, a model checker and specification language
+TLA+, a model checker and a system specification language.
    
-   Use tla+ toolbox to open the module toplevels in /tla+ dir
+   Use tla+ toolbox to open the module toplevels in the /tla+ dir
