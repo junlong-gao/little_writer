@@ -191,7 +191,7 @@ WaitB(t) ==
 
 Signal(t) ==
        ~Blocked(t) /\ ~MarkedCVWaiting(t)  /\ ~MarkedSignaled
-    /\ Mutex.holder = {t} (* posix does not require that, but... *)
+    (* /\ Mutex.holder = {t} posix does not require that, but... *)
     /\ IF SemQ = <<>>
        THEN (
            UNCHANGED <<CV, Mutex, SemQ, ThreadLocalSem>>
@@ -206,7 +206,7 @@ Signal(t) ==
 
 Broadcast(t) ==
        ~Blocked(t) /\ ~MarkedCVWaiting(t)  /\ ~MarkedSignaled
-    /\ Mutex.holder = {t} (* posix does not require that, but... *)
+    (* /\ Mutex.holder = {t}  posix does not require that, but... *)
     /\ CV' = [ waiters  |-> CV.waiters,
                signaled |-> CV.signaled \union {SemQ[i] : i \in 1..Len(SemQ)}]
     /\ UNCHANGED <<Mutex, SemQ, ThreadLocalSem>>
@@ -256,5 +256,5 @@ THEOREM MSemQSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 17:28:26 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 17:35:47 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg
