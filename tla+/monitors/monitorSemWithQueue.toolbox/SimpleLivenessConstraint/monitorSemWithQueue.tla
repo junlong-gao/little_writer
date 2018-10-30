@@ -16,7 +16,7 @@ Pop(seq) ==
 RECURSIVE PopN(_, _)
 PopN(n, queue) ==
    IF n = 0 \/ Len(queue) = 0 THEN queue
-   ELSE PopN(n - 1, Tail(queue))
+   ELSE PopN(n - 1, Pop(queue))
    
 RECURSIVE FlattenSet(_)
 FlattenSet(ss) ==
@@ -180,29 +180,16 @@ WaitA(t) ==
     
 WaitB(t) ==
        ~Blocked(t) /\ MarkedCVWaiting(t) /\ ~MarkedSignaled
-    /\ LET localSem == ThreadLocalSem[t]
-       IN
-       IF localSem.counter > 0
-       (* if the sem counter is pos (a signal has already resolved this thread,
-          sem.down immediately gets unblocked and gets put into mutex
-          queue *)
-       THEN (
-             CV' = [ waiters  |-> CV.waiters \ {t}, 
-                     signaled |-> CV.signaled ]
-          /\ Mutex' = [ holder  |-> {}, 
-                        waiters |-> Mutex.waiters \union {t} ]
-          /\ ThreadLocalSem' = [ThreadLocalSem EXCEPT ![t] = [counter |-> 0, waiters |-> {}]] 
-          /\ UNCHANGED<<SemQ>>
-       )
-       ELSE (
-       (* physically sleep, and wait for a signal resolved *)
-             ThreadLocalSem' = [ThreadLocalSem EXCEPT ![t] = 
+   (* physically sleep, and wait for a signal resolved 
+      otherwise signalResolve will put this back to mutex wait queue
+   *)     
+    /\ ThreadLocalSem[t].counter = 0
+    /\ ThreadLocalSem' = [ThreadLocalSem EXCEPT ![t] = 
                                  [ counter |-> 0,
                                    waiters |-> ThreadLocalSem[t].waiters \union {t}
                                  ]
                                ] 
-          /\ UNCHANGED<<Mutex, CV, SemQ>>
-       )
+    /\ UNCHANGED<<Mutex, CV, SemQ>>
 
 
 Signal(t) ==
@@ -213,7 +200,7 @@ Signal(t) ==
            UNCHANGED <<CV, Mutex, SemQ, ThreadLocalSem>>
        )
        ELSE (
-           LET waiting == Front(SemQ)
+           LET waiting == Back(SemQ)
            IN CV'= [ waiters  |-> CV.waiters,
                      signaled |-> CV.signaled \union {waiting} ]
                  (* let signal resolve pop it of the queue *)
@@ -231,25 +218,17 @@ Broadcast(t) ==
              
 SignalResolve ==
          MarkedSignaled
-      /\ LET physically_blocked == { t \in THREADS : t \in CV.signaled /\ t \in ThreadLocalSem[t].waiters }
-         IN CV' = [ waiters  |-> CV.waiters \ physically_blocked, 
-                    signaled |-> {} ]
-            /\ SemQ' = PopN(SetSize(CV.signaled), SemQ)
-            /\ ThreadLocalSem' = [ t \in THREADS |-> 
-                                   IF t \in CV.signaled 
-                                THEN 
-                                   (IF ThreadLocalSem[t].waiters = {}
-                                    THEN 
-                                    [ counter |-> 1,
-                                      waiters |-> {} ]
-                                    ELSE
-                                    [ counter |-> 0,
-                                      waiters |-> {} ]
-                                    )
-                                ELSE ThreadLocalSem[t]
+      /\ CV' = [ waiters  |-> CV.waiters \ CV.signaled, 
+                 signaled |-> {} ]
+      /\ SemQ' = PopN(SetSize(CV.signaled), SemQ)
+      /\ ThreadLocalSem' = [ t \in THREADS |-> 
+                             IF t \in CV.signaled 
+                             THEN [ counter |-> 0,
+                                    waiters |-> {} ]
+                             ELSE ThreadLocalSem[t]
                             ]
       /\ Mutex' = [ holder |-> Mutex.holder,
-                    waiters |-> Mutex.waiters \union physically_blocked]
+                    waiters |-> Mutex.waiters \union CV.signaled]
 
 (*
 MNext describes how system may evolve given any current state.
@@ -279,5 +258,5 @@ THEOREM MSemQSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 16:21:39 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 17:06:47 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg
