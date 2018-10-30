@@ -29,7 +29,7 @@
 <stringAttribute key="modelExpressionEval" value=""/>
 <stringAttribute key="modelParameterActionConstraint" value=""/>
 <listAttribute key="modelParameterConstants">
-<listEntry value="THREADS;;{t1, t2, t3, t4};1;1"/>
+<listEntry value="THREADS;;{t1, t2, t3, t4, t5};1;1"/>
 </listAttribute>
 <stringAttribute key="modelParameterContraint" value=""/>
 <listAttribute key="modelParameterDefinitions"/>
