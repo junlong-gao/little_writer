@@ -79,17 +79,25 @@ SemWaitAfterCVWaitReg ==
 
 
 (**** BODY OF THE SPEC ****)
-(* Some helper checks *)      
+(* Some helper checkers *)  
+(* logically blocked by CV *)    
 MarkedCVWaiting(t) ==
    t \in CV.waiters
-
-MarkedSignaled ==
-   ~ (CV.signaled = {})
-      
+(* physically blocked by CV wait or in Lock wait queue *)
 Blocked(t) ==
    t \in Sem.waiters
    \/ t \in Mutex.waiters
 
+(* signal is done in two steps: register for signalling (required for
+   the spec to track liveness) then resolve those by unblocking the
+   threads that are physically blocked.
+   
+   Signal is made into semantically a single step because no other threads can
+   make progress if a signal and broadcast is called before it is resolved.
+*)
+MarkedSignaled ==
+   ~ (CV.signaled = {})
+      
 (* Init states *)
 MSemInit ==
         CV = [ waiters |-> {}, signaled |-> {} ]
@@ -98,7 +106,8 @@ MSemInit ==
    
 Lock(t) ==
     Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) /\ ~MarkedSignaled
+    /\ ~MarkedSignaled
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) 
     /\ ~(t \in Mutex.holder)
     /\ UNCHANGED<<CV, Sem>>
     /\ Mutex' = [ holder |-> Mutex.holder, waiters |-> Mutex.waiters \union {t} ]
@@ -115,7 +124,8 @@ LockResolve ==
 
 Unlock(t) ==
     Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) /\ ~MarkedSignaled
+    /\ ~MarkedSignaled
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
     /\ Mutex.holder = {t}
     /\ Mutex' = [holder |-> {}, waiters |-> Mutex.waiters]
     /\ UNCHANGED <<CV, Sem>>
@@ -125,21 +135,30 @@ Wait cannot release lock and wait on sem atomically
 *)
 WaitA(t) ==
     Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) /\ ~MarkedSignaled
+    /\ ~MarkedSignaled
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) 
     /\ Mutex.holder = {t}
     /\ CV' = [ waiters |-> CV.waiters \union {t}, signaled |-> CV.signaled ]
     /\ Mutex' = [ holder |-> {}, waiters |-> Mutex.waiters]
     /\ UNCHANGED<<Sem>>
-    
+
+(*
+The second step of the CV.Wait call involves the semaphore down:
+1) if the sem counter is pos, just proceed and remove itself from the wait set
+2) else, phyiscally wait using semaphore down.
+*)    
 WaitB(t) ==
     Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ MarkedCVWaiting(t) /\ ~MarkedSignaled
+    /\ ~MarkedSignaled
+    /\ ~Blocked(t) /\ MarkedCVWaiting(t) 
     /\ IF Sem.counter > 0
        THEN (
           Sem' = [ counter |-> Sem.counter - 1,
                    waiters |-> Sem.waiters ]
-          /\ CV' = [ waiters |-> CV.waiters \ {t}, signaled |-> CV.signaled \ {t} ]
-          /\ Mutex' = [ holder |-> {}, waiters |-> Mutex.waiters \union {t} ]
+          /\ CV' = [ waiters |-> CV.waiters \ {t}, 
+                     signaled |-> CV.signaled]
+          /\ Mutex' = [ holder |-> {}, 
+                        waiters |-> Mutex.waiters \union {t} ]
        )
        ELSE (
           Sem'= [ counter |-> Sem.counter, (* 0 *)
@@ -150,7 +169,8 @@ WaitB(t) ==
 
 Signal(t) ==
        Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)  /\ ~MarkedSignaled
+    /\ ~MarkedSignaled
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) 
     /\ Mutex.holder = {t} (* posix does not require that, but... *)
     /\ IF CV.waiters = {}
        THEN (
@@ -165,12 +185,21 @@ Signal(t) ==
 
 Broadcast(t) ==
        Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)  /\ ~MarkedSignaled
+    /\ ~MarkedSignaled
+    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
     /\ Mutex.holder = {t} (* posix does not require that, but... *)
     /\ CV' = [ waiters  |-> CV.waiters,
                signaled |-> CV.signaled \union CV.waiters]
     /\ UNCHANGED <<Mutex, Sem>>
-          
+
+(*
+Apply thw signal for all the threads that signal just delivered:
+1. unblock the threads in the sem.waiters by using CV.signaled,
+   they are unblocked from CV.wait and go to lock competition
+2. if there is still count remains, add them to sem.counter.
+   they can be used by threads registered for CV wait but have
+   not called sem.down yet.
+*)          
 SignalResolve ==
          Sem.counter < SEMCOUNT
       /\ MarkedSignaled
@@ -223,5 +252,5 @@ THEOREM MSemSpec => MonitorSpec!MSpec
  
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 19:35:12 PDT 2018 by junlongg
+\* Last modified Tue Oct 30 06:08:14 PDT 2018 by junlongg
 \* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg

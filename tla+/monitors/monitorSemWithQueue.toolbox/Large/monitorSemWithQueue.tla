@@ -123,21 +123,29 @@ if it ends up in a sem queue *)
 MarkedCVWaiting(t) ==
    t \in CV.waiters
 
-(* 
-Since signal is done in two steps: signal/broadcast, then resolve
-Use this to stop the world to only complete the signal if it is marked,
-otherwise TLC liveness checker will assert this thread signal can be starved
-forever.
+(* signal is done in two steps: register for signalling (required for
+   the spec to track liveness) then resolve those by unblocking the
+   threads that are physically blocked.
+
+   Signal is made into semantically a single step because no other threads can
+   make progress if a signal and broadcast is called before it is resolved.
+      
+   Otherwise TLC liveness checker will assert this thread signal can be starved
+   forever.  
 *)
 MarkedSignaled ==
    ~ (CV.signaled = {})
 
 (*
-If a thread's local sem is 1, it is considered in transient state
-and the system must resolve these threads first by allowing them
-unblock from CV wait.
+If a thread's local sem is 1, it is considered in a transient state
+and the system must resolve these threads first by allowing them to
+unblock from CV WaitB_2 first.
+
+This makes that thread's CV.Wait() semantically a single step when it
+has to be done into two steps: CV.WaitA() then CV.WaitB_2().
+
 Otherwise TLC liveness checker will assert this thread can be starved
-forever.
+from that CV.wait call forever.
 *)
 MarkedUped ==
    \E t \in THREADS :
@@ -317,5 +325,5 @@ THEOREM MSemQSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 30 05:49:03 PDT 2018 by junlongg
+\* Last modified Tue Oct 30 06:12:20 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg
