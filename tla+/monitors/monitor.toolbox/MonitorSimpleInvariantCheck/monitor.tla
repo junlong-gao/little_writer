@@ -248,23 +248,37 @@ trivial infinite stuttering steps.
 *)
 MSpec ==
     MInit /\ [][MNext]_<<CV, Mutex>> /\ WF_<<CV, Mutex>>(MNext)
-
+    
+CVWaitCorrectness ==
+    \A t \in THREADS:
+       (t \in CV'.signaled) => (t \in CV.signaled \/ t \in CV.waiters)
+    
+(*
+This is the non-trivial safety property for CV wait and signal: for every thread
+that received signal, it must called Wait() on CV before.
+*)
+CVWaitSafety ==
+   [][CVWaitCorrectness]_<<CV, Mutex>>
+ 
+MonitorSafety == 
+   CVWaitSafety
+   /\ [][MonitorTypeInv]_<<CV, Mutex>>  
 (*
 This is one of the non-trivial liveness property any monitor spec must satisfy.
 If some thread waited and then is signaled, it must eventually wake up and try to
 acquire the lock again.
 
 Monitor provides this fundamental guarantee so that different threads can
-use these monitors to communicate each other like:
+communicate each other like:
 T1: wait() on some condition
 T2: change the condition and communicate to T1 via signal()/broadcast().
 *)
 CVSignalFairness ==
     \A t \in THREADS:
         (t \in CV.signaled) ~> (t \in Mutex.waiters)
-
+       
 THEOREM MSpec => []MonitorTypeInv
 =============================================================================
 \* Modification History
-\* Last modified Sun Oct 28 23:47:14 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 19:31:04 PDT 2018 by junlongg
 \* Created Sun Oct 28 16:06:17 PDT 2018 by junlongg

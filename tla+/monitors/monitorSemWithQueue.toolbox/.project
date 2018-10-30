@@ -18,7 +18,7 @@
 		<link>
 			<name>monitor.tla</name>
 			<type>1</type>
-			<location>/Users/junlongg/little_writer/tla+/monitors/monitor.tla</location>
+			<locationURI>PARENT-1-PROJECT_LOC/monitor.tla</locationURI>
 		</link>
 		<link>
 			<name>monitorSemWithQueue.tla</name>
