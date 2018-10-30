@@ -2,7 +2,7 @@
 
 EXTENDS Integers, Sequences
 
-(* Util functions *)  
+(**** UTILITIES ****)  
 RECURSIVE SetSize(_)
 SetSize(set) == 
   IF set = {} THEN 0
@@ -38,7 +38,8 @@ Push(v, seq) ==
 Front(seq) == seq[1]               
                          
 CONSTANT THREADS (* a set of running threads *)
-   
+
+(**** MODEL VARIABLES ****)   
 (* a mutex is a function (struct) maps from {holder, waiters} to
    sets of threads *)
 VARIABLE Mutex
@@ -109,12 +110,7 @@ MonitorConservative ==
    *)
    /\ FlattenSet({ThreadLocalSem[t].waiters : t \in THREADS}) \subseteq CV.waiters
 
-
-MonitorInv ==
-       MutexTypeOK /\ CVTypeOK /\ SemTypeOK /\ ThreadLocalSemTypeOK
-    /\ CVMemoryLess /\ MutualExclusion
-    /\ MonitorConservative
-
+(**** HELPFUL STATE CHECKS ****)
 (* State Assertions *) 
 (* check if a thread is physically blocked *)     
 Blocked(t) ==
@@ -132,7 +128,8 @@ Use this to stop the world to only complete the signal if it is marked
 *)
 MarkedSignaled ==
    ~ (CV.signaled = {})
-   
+
+(**** THE STATE TRANSITIONS ****)   
 (* Init states *)
 MSemQInit ==
         CV = [ waiters |-> {}, signaled |-> {} ]
@@ -230,9 +227,7 @@ SignalResolve ==
       /\ Mutex' = [ holder |-> Mutex.holder,
                     waiters |-> Mutex.waiters \union CV.signaled]
 
-(*
-MNext describes how system may evolve given any current state.
-*)
+(**** THE COMPLETE SPEC ****)
 MSemQNext ==
        LockResolve \/ SignalResolve
     \/ \E t \in THREADS :
@@ -241,10 +236,6 @@ MSemQNext ==
        \/ Signal(t)
        \/ Broadcast(t)
 
-(*
-MSpec describes the allowed behaviors as well as excluding behaviors containing
-trivial infinite stuttering steps.
-*)
 MSemQSpec ==
     MSemQInit 
     /\ [][MSemQNext]_<<CV, Mutex, SemQ, ThreadLocalSem>> 
@@ -252,11 +243,18 @@ MSemQSpec ==
 
 MonitorSpec == INSTANCE monitor
 
+(**** SAFETY CONSTRAINT ****)
+MonitorInv ==
+       MutexTypeOK /\ CVTypeOK /\ SemTypeOK /\ ThreadLocalSemTypeOK
+    /\ CVMemoryLess /\ MutualExclusion
+    /\ MonitorConservative
+
+(**** LIVENESS CONSTRAINT ****)
 CVSignalFairness == MonitorSpec!CVSignalFairness
 
 THEOREM MSemQSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 17:06:47 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 17:28:26 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg

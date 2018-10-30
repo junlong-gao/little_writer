@@ -20,7 +20,8 @@ ChooseN(N, set) ==
 MinOfTwoInt(x, y) ==
    IF x < y THEN x
    ELSE y
-   
+
+(**** MODEL VARIABLES ****)   
 (* a mutex is a function (struct) maps from {holder, waiters} to
    sets of threads *)
 VARIABLE Mutex
@@ -73,20 +74,12 @@ MonitorConservative ==
    /\ ( Mutex.waiters \intersect Sem.waiters = {} )
    /\ ( Mutex.holder \intersect Sem.waiters = {} )
 
-(*
-This is the invariant of the monitors,
-which is the conjuction of the above 4 invariants
-
-Two invariants to check:
-*)
-MonitorTypeInv ==
-       MutexTypeOK /\ CVTypeOK /\ SemTypeOK
-    /\ CVMemoryLess /\ MutualExclusion /\ SemNonNeg
-    /\ MonitorConservative
-
 SemWaitAfterCVWaitReg ==
    Sem.waiters \subseteq CV.waiters
-      
+
+
+(**** BODY OF THE SPEC ****)
+(* Some helper checks *)      
 MarkedCVWaiting(t) ==
    t \in CV.waiters
 
@@ -103,16 +96,6 @@ MSemInit ==
      /\ Mutex = [ holder |-> {}, waiters |-> {} ]
      /\ Sem = [ counter |-> 0, waiters |-> {} ]
    
-(*
-- Lock(t) where t is in threads
-   Enabling condition:
-   1. not Blocked(t).
-   2. t is not the current lock holder
-
-   Next step:
-   Add t to the waiters set. This is the relaxed locking semantics (still correct, but
-   allows to express more subtle states in real world). See LockResolve step below.
-*)
 Lock(t) ==
     Sem.counter < SEMCOUNT
     /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) /\ ~MarkedSignaled
@@ -192,21 +175,19 @@ SignalResolve ==
          Sem.counter < SEMCOUNT
       /\ MarkedSignaled
       /\ (
-      LET minVal == MinOfTwoInt(SetSize(Sem.waiters), SetSize(CV.signaled))
-      IN LET pickedSubSet == ChooseN(minVal, Sem.waiters)
-      IN LET reduced == SetSize(CV.signaled) - minVal 
-      IN  
-      /\ Mutex' = [ holder  |-> Mutex.holder,
-                    waiters |-> Mutex.waiters \union pickedSubSet ]
-      /\ CV' = [ waiters  |-> CV.waiters \ pickedSubSet, 
-                 signaled |-> {} ]
-      /\ Sem' = [ counter |-> Sem.counter + reduced,
-                  waiters |-> Sem.waiters \ pickedSubSet]
+          LET minVal == MinOfTwoInt(SetSize(Sem.waiters), SetSize(CV.signaled))
+          IN LET pickedSubSet == ChooseN(minVal, Sem.waiters)
+          IN LET reduced == SetSize(CV.signaled) - minVal 
+          IN  
+          /\ Mutex' = [ holder  |-> Mutex.holder,
+                        waiters |-> Mutex.waiters \union pickedSubSet ]
+          /\ CV' = [ waiters  |-> CV.waiters \ pickedSubSet, 
+                     signaled |-> {} ]
+          /\ Sem' = [ counter |-> Sem.counter + reduced,
+                      waiters |-> Sem.waiters \ pickedSubSet]
       )
 
-(*
-MNext describes how system may evolve given any current state.
-*)
+(**** The complete spec ****)
 MSemNext ==
     LockResolve
     \/ SignalResolve
@@ -216,22 +197,27 @@ MSemNext ==
        \/ Signal(t)
        \/ Broadcast(t)
 
-(*
-MSpec describes the allowed behaviors as well as excluding behaviors containing
-trivial infinite stuttering steps.
-*)
+
 MSemSpec ==
     MSemInit 
     /\ [][MSemNext]_<<CV, Mutex, Sem>> 
     /\ WF_<<CV, Mutex, Sem>>(MSemNext)
 
-MonitorSpec == INSTANCE monitor
+MonitorSpec == INSTANCE monitor 
 
+(**** SAFTY CONSTRAINT ****) 
+MonitorTypeInv ==
+       MutexTypeOK /\ CVTypeOK /\ SemTypeOK
+    /\ CVMemoryLess /\ MutualExclusion /\ SemNonNeg
+    /\ MonitorConservative
+    /\ SemWaitAfterCVWaitReg
+    
+(**** LIVENESS CONSTRAINT ****)
 CVSignalFairness == MonitorSpec!CVSignalFairness
-
+   
 THEOREM MSemSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 02:21:44 PDT 2018 by junlongg
+\* Last modified Mon Oct 29 17:25:23 PDT 2018 by junlongg
 \* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg
