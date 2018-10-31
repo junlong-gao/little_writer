@@ -123,34 +123,6 @@ if it ends up in a sem queue *)
 MarkedCVWaiting(t) ==
    t \in CV.waiters
 
-(* signal is done in two steps: register for signalling (required for
-   the spec to track liveness) then resolve those by unblocking the
-   threads that are physically blocked.
-
-   Signal is made into semantically a single step because no other threads can
-   make progress if a signal and broadcast is called before it is resolved.
-      
-   Otherwise TLC liveness checker will assert this thread signal can be starved
-   forever.  
-*)
-MarkedSignaled ==
-   ~ (CV.signaled = {})
-
-(*
-If a thread's local sem is 1, it is considered in a transient state
-and the system must resolve these threads first by allowing them to
-unblock from CV WaitB_2 first.
-
-This makes that thread's CV.Wait() semantically a single step when it
-has to be done into two steps: CV.WaitA() then CV.WaitB_2().
-
-Otherwise TLC liveness checker will assert this thread can be starved
-from that CV.wait call forever.
-*)
-MarkedUped ==
-   \E t \in THREADS :
-      ThreadLocalSem[t].counter = 1
-      
 (**** THE STATE TRANSITIONS ****)   
 (* Init states *)
 MSemQInit ==
@@ -161,23 +133,20 @@ MSemQInit ==
    
 
 Lock(t) ==
-       ~MarkedSignaled /\ ~MarkedUped
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) 
+       ~Blocked(t) /\ ~MarkedCVWaiting(t) 
     /\ ~(t \in Mutex.holder)
     /\ UNCHANGED<<CV, SemQ, ThreadLocalSem>>
     /\ Mutex' = [ holder |-> Mutex.holder, waiters |-> Mutex.waiters \union {t} ]
 
 LockResolve ==
-      ~MarkedSignaled /\ ~MarkedUped
-   /\ ~(Mutex.waiters = {}) /\ (Mutex.holder = {})
+      ~(Mutex.waiters = {}) /\ (Mutex.holder = {})
    /\ LET waiter == CHOOSE waiter \in Mutex.waiters : TRUE
       IN  Mutex' = [holder |-> {waiter},
                     waiters |-> Mutex.waiters \ {waiter}]
    /\ UNCHANGED <<CV, SemQ, ThreadLocalSem>>
 
 Unlock(t) ==
-       ~MarkedSignaled /\ ~MarkedUped
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) 
+       ~Blocked(t) /\ ~MarkedCVWaiting(t) 
     /\ Mutex.holder = {t}
     /\ Mutex' = [holder |-> {}, waiters |-> Mutex.waiters]
     /\ UNCHANGED <<CV, SemQ, ThreadLocalSem>>
@@ -186,8 +155,7 @@ Unlock(t) ==
 Wait cannot release lock and wait on sem atomically
 *)
 WaitA(t) ==
-       ~MarkedSignaled /\ ~MarkedUped
-    /\  ~Blocked(t) /\ ~MarkedCVWaiting(t)
+      ~Blocked(t) /\ ~MarkedCVWaiting(t)
     /\ Mutex.holder = {t}
     /\ LET localSem == [counter |-> 0, 
                         waiters |-> {}]
@@ -198,113 +166,95 @@ WaitA(t) ==
                   waiters |-> Mutex.waiters]
     /\ SemQ'  = Push(t, SemQ)
     /\ ThreadLocalSem' = [ThreadLocalSem EXCEPT ![t] = localSem] 
-
-(* 
-physically sleep, and wait for a signal resolved 
-otherwise signalResolve will put this back to mutex wait queue
-*)       
-WaitB_1(t) ==
-       ~MarkedSignaled /\ ~MarkedUped
-    /\ ~Blocked(t) /\ MarkedCVWaiting(t) 
-    /\ ThreadLocalSem[t].counter = 0
-    /\ ThreadLocalSem' = [ThreadLocalSem EXCEPT ![t] = 
-                                 [ counter |-> 0,
-                                   waiters |-> ThreadLocalSem[t].waiters \union {t}
-                                 ]
-                               ] 
-    /\ UNCHANGED<<Mutex, CV, SemQ>>
-(*
-Marked up, thus this concurrent wait immediately completes with another signal
-*)
-WaitB_2(t) ==
-    ~MarkedSignaled /\ MarkedUped
-    /\ ~Blocked(t) /\ MarkedCVWaiting(t) 
-    /\ ThreadLocalSem[t].counter = 1
+    
+WaitB_fast(t) ==
+       ~Blocked(t) 
+    /\ MarkedCVWaiting(t) 
+    /\ ThreadLocalSem[t].counter > 0
     /\ ThreadLocalSem' = [ThreadLocalSem EXCEPT ![t] = 
                                  [ counter |-> 0,
                                    waiters |-> {}
                                  ]
                                ] 
     /\ Mutex' = [ holder  |-> Mutex.holder, 
+                  waiters |-> Mutex.waiters \union {t}] 
+    /\ CV' = [ waiters |-> CV.waiters \ {t},
+               signaled |-> CV.signaled \ {t} ]                          
+    /\ UNCHANGED<<SemQ>>
+(* 
+physically sleep, and wait for a signal resolved 
+otherwise signalResolve will put this back to mutex wait queue
+*)       
+WaitB_sleep(t) ==
+       ~Blocked(t) 
+    /\ MarkedCVWaiting(t) 
+    /\ ThreadLocalSem[t].counter = 0
+    /\ ~(t \in CV.signaled)
+    /\ ThreadLocalSem' = [ThreadLocalSem EXCEPT ![t] = 
+                                 [ counter |-> 0,
+                                   waiters |-> ThreadLocalSem[t].waiters \union {t}
+                                 ]
+                               ] 
+    /\ UNCHANGED<<Mutex, CV, SemQ>>
+
+WaitB_wake(t) ==   
+       ~Blocked(t) 
+    /\ MarkedCVWaiting(t) 
+    /\ t \in CV.signaled
+    /\ ThreadLocalSem[t].counter = 0
+    /\ Mutex' = [ holder  |-> Mutex.holder, 
                   waiters |-> Mutex.waiters \union {t} ]
     /\ CV' = [ waiters |-> CV.waiters \ {t},
-               signaled |-> CV.signaled ]
-    /\ UNCHANGED<<SemQ>>  
-      
+               signaled |-> CV.signaled \ {t} ]
+    /\ UNCHANGED<<ThreadLocalSem, SemQ>>  
+
+SemUp(Sem) ==
+   IF Sem.waiters = {}
+   THEN [ counter |-> 1,
+          waiters |-> {} ]
+   ELSE
+     LET picked == CHOOSE x \in Sem.waiters : TRUE
+     IN [ counter |-> 0,
+          waiters |-> Sem.waiters \ { picked }  ] 
+               
 Signal(t) ==
-       ~MarkedSignaled /\ ~MarkedUped      
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
-    /\ IF SemQ = <<>>
-       THEN (
-           UNCHANGED <<CV, Mutex, SemQ, ThreadLocalSem>>
-       )
-       ELSE (
-           LET waiting == Back(SemQ)
-           IN CV'= [ waiters  |-> CV.waiters,
-                     signaled |-> CV.signaled \union {waiting} ]
-                 (* let signal resolve pop it of the queue *)
-              /\ UNCHANGED<<Mutex, SemQ, ThreadLocalSem>>             
-       )
+       ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ ~ (SemQ = <<>>)
+    /\ LET waiting == Back(SemQ)
+       IN CV'= [ waiters  |-> CV.waiters,
+                 signaled |-> CV.signaled \union {waiting} ]
+          /\ ThreadLocalSem' = [ThreadLocalSem EXCEPT ![waiting] = SemUp(ThreadLocalSem[waiting]) ] 
+          /\ SemQ' = Pop(SemQ)
+          /\ UNCHANGED<<Mutex>>             
 
 Broadcast(t) ==
-       ~MarkedSignaled /\ ~MarkedUped      
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
-    /\ CV' = [ waiters  |-> CV.waiters,
-               signaled |-> CV.signaled \union {SemQ[i] : i \in 1..Len(SemQ)}]
-    /\ UNCHANGED <<Mutex, SemQ, ThreadLocalSem>>
+       ~Blocked(t) /\ ~MarkedCVWaiting(t)
+    /\ LET waked == {SemQ[i] : i \in 1..Len(SemQ)}
+       IN CV' = [ waiters  |-> CV.waiters,
+                  signaled |-> CV.signaled \union waked]
+          /\ SemQ' = <<>>
+          /\ ThreadLocalSem' = [ thr \in THREADS |->
+             IF thr \in waked
+             THEN SemUp(ThreadLocalSem[thr])
+             ELSE  ThreadLocalSem[thr] ]
+          /\ UNCHANGED <<Mutex>>
 
-
-(*
-Signal resolve unblocks those signaled on the queue by resetting
-their semaphore.
-These binary semaphore are either 
-1) down'ed, thus up here unblocks them
-2) up'ed, thus cancels with the down of the caller.
-
-This is still not an accurate modelling though. It would be
-nice to have it here handle up and resolve some of the blocked,
-and leave some counter to be 1 and let the waiters to call down
-and make progress.
-*)             
-SignalResolve ==
-         MarkedSignaled
-      /\ LET physicall_blocked == { t \in CV.signaled : t \in ThreadLocalSem[t].waiters }
-         IN (* remove those physically blocked from CV wait since their Wait() completes here. *)
-            (* for the rest, they are up'ed and will be resolved concurrently in WaitB_2 *)
-            (* we have to deque all of them during signal/broadcast, since in thread local context
-               a thread does not know its position in queue
-            *)
-               CV' = [ waiters  |-> CV.waiters \ physicall_blocked, 
-                       signaled |-> {} ]
-            /\ SemQ' = PopN(SetSize(CV.signaled), SemQ)
-            (* for those not physically blocked, mark them up'ed *)
-            /\ ThreadLocalSem' = [ t \in THREADS |-> 
-                             IF t \in CV.signaled 
-                             THEN ( IF t \in physicall_blocked
-                                    THEN [ counter |-> 0,
-                                           waiters |-> {} ]
-                                    ELSE [ counter |-> 1,
-                                           waiters |-> {} ]
-                                    )
-                             ELSE ThreadLocalSem[t]
-                            ]
-      (* for  those physically blocked, mark them to be unblocked thus completes the wait for them *)
-      /\ Mutex' = [ holder |-> Mutex.holder,
-                    waiters |-> Mutex.waiters \union physicall_blocked ]
 
 (**** THE COMPLETE SPEC ****)
 MSemQNext ==
-       LockResolve \/ SignalResolve
+       LockResolve
     \/ \E t \in THREADS :
        \/ Lock(t)
-       \/ WaitA(t) \/ WaitB_1(t) \/ WaitB_2(t)
+       \/ WaitA(t) \/ WaitB_fast(t) \/ WaitB_sleep(t) \/ WaitB_wake(t)
        \/ Signal(t)
        \/ Broadcast(t)
 
 MSemQSpec ==
     MSemQInit 
     /\ [][MSemQNext]_<<CV, Mutex, SemQ, ThreadLocalSem>> 
-    /\ WF_<<CV, Mutex, SemQ, ThreadLocalSem>>(MSemQNext)
+    /\ \A t \in THREADS :
+        WF_<<CV, Mutex, SemQ, ThreadLocalSem>>(WaitB_wake(t))
+        /\ WF_<<CV, Mutex, SemQ, ThreadLocalSem>>(WaitB_fast(t))
 
 MonitorSpec == INSTANCE monitor
 
@@ -325,5 +275,5 @@ THEOREM MSemQSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 30 06:12:20 PDT 2018 by junlongg
+\* Last modified Tue Oct 30 18:58:17 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg
