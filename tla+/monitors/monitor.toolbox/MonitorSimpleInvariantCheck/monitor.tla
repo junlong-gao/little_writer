@@ -170,6 +170,29 @@ Wait(t) ==
     /\ Mutex' = [ holder |-> {}, waiters |-> Mutex.waiters]
 
 (*
+This is added to allow us to express the fact that
+"A thread waited in some state and then is signaled in some state by another thread".
+
+In POSIX, there is no requirement on whether the signaled thread should immediately
+get lock or appear in some position in the lock queue (Mesa semantics). A signalled
+thread cannot put itself on wait again before it is resolved from sleeping (woken)
+and attempts to get the lock. Therefore, it is allowed to have some delay between
+getting signaled and being put on lock's wait set.
+
+Enabling condition:
+signaled set not empty
+
+Step:
+Remove these signaled from waiters in CV and put them
+into waiters of Lock.
+*)
+Wakeup ==
+      ~ (CV.signaled = {})
+      /\  Mutex' = [ holder  |-> Mutex.holder,
+                     waiters |-> Mutex.waiters \union CV.signaled ]
+      /\  CV' = [ waiters |-> CV.waiters \  CV.signaled, signaled |-> {} ]
+      
+(*
 - Signal(t) where t is in threads
    Enabling condition:
    t not blocked.
@@ -207,35 +230,13 @@ Broadcast(t) ==
                signaled |-> CV.signaled \union CV.waiters]
     /\ UNCHANGED <<Mutex>>
 
-(*
-This is added to allow us to express the fact that
-"A thread waited in some state and then is signaled in some state by another thread".
-
-In POSIX, there is no requirement on whether the signaled thread should immediately
-get lock or appear in some position in the lock queue (Mesa semantics). A signalled
-thread cannot put itself on wait again before it is resolved from sleeping (woken)
-and attempts to get the lock. Therefore, it is allowed to have some delay between
-getting signaled and being put on lock's wait set.
-
-Enabling condition:
-signaled set not empty
-
-Step:
-Remove these signaled from waiters in CV and put them
-into waiters of Lock.
-*)
-SignalResolve ==
-      ~ (CV.signaled = {})
-      /\  Mutex' = [ holder  |-> Mutex.holder,
-                     waiters |-> Mutex.waiters \union CV.signaled ]
-      /\  CV' = [ waiters |-> CV.waiters \  CV.signaled, signaled |-> {} ]
 
 (*
 MNext describes how system may evolve given any current state.
 *)
 MNext ==
     LockResolve
-    \/ SignalResolve
+    \/ Wakeup
     \/ \E t \in THREADS :
        \/ Lock(t)
        \/ Wait(t)
@@ -247,7 +248,7 @@ MSpec describes the allowed behaviors as well as excluding behaviors containing
 trivial infinite stuttering steps.
 *)
 MSpec ==
-    MInit /\ [][MNext]_<<CV, Mutex>> /\ WF_<<CV, Mutex>>(MNext)
+    MInit /\ [][MNext]_<<CV, Mutex>> /\ WF_<<CV, Mutex>>(Wakeup)
     
 CVWaitCorrectness ==
     \A t \in THREADS:
@@ -280,5 +281,5 @@ CVSignalFairness ==
 THEOREM MSpec => []MonitorTypeInv
 =============================================================================
 \* Modification History
-\* Last modified Mon Oct 29 19:31:04 PDT 2018 by junlongg
+\* Last modified Tue Oct 30 19:04:00 PDT 2018 by junlongg
 \* Created Sun Oct 28 16:06:17 PDT 2018 by junlongg

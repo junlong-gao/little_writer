@@ -2,7 +2,7 @@
 TLC2 Version 2.13 of 18 July 2018
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with seed -4181928307213464944 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14 x86_64, Oracle Corporation 1.8.0_131 x86_64).
+Running breadth-first search Model-Checking with seed 2930939890166257544 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
@@ -27,7 +27,7 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2018-10-30 12:38:36)
+Starting... (2018-10-30 19:06:57)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2189:0 @!@!@
 Computing initial states...
@@ -43,7 +43,7 @@ Model checking completed. No error has been found.
   based on the actual fingerprints:  val = 7.9E-15
 @!@!@ENDMSG 2193 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2018-10-30 12:38:43
+The coverage statistics at 2018-10-30 19:07:04
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   line 129, col 19 to line 129, col 20 of module monitorWithSem: 114
@@ -169,7 +169,7 @@ The coverage statistics at 2018-10-30 12:38:43
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(14) at 2018-10-30 12:38:43: 728 states generated (6,854 s/min), 244 distinct states found (2,297 ds/min), 0 states left on queue.
+Progress(14) at 2018-10-30 19:07:04: 728 states generated (6,885 s/min), 244 distinct states found (2,307 ds/min), 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
 728 states generated, 244 distinct states found, 0 states left on queue.
@@ -178,8 +178,8 @@ Progress(14) at 2018-10-30 12:38:43: 728 states generated (6,854 s/min), 244 dis
 The depth of the complete state graph search is 14.
 @!@!@ENDMSG 2194 @!@!@
 @!@!@STARTMSG 2268:0 @!@!@
-The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 4 and the 95th percentile is 3).
+The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 3 and the 95th percentile is 3).
 @!@!@ENDMSG 2268 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 6723ms at (2018-10-30 12:38:43)
+Finished in 6713ms at (2018-10-30 19:07:04)
 @!@!@ENDMSG 2186 @!@!@

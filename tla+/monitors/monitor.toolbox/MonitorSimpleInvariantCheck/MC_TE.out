@@ -2,7 +2,7 @@
 TLC2 Version 2.13 of 18 July 2018
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with seed -8040620038619520466 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
+Running breadth-first search Model-Checking with seed -2218210768260341546 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
@@ -23,7 +23,7 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2018-10-29 19:31:48)
+Starting... (2018-10-30 19:04:31)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2189:0 @!@!@
 Computing initial states...
@@ -39,7 +39,7 @@ Model checking completed. No error has been found.
   based on the actual fingerprints:  val = 9.2E-16
 @!@!@ENDMSG 2193 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2018-10-29 19:31:54
+The coverage statistics at 2018-10-30 19:04:37
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   line 129, col 11 to line 130, col 57 of module monitor: 37
@@ -54,28 +54,28 @@ The coverage statistics at 2018-10-29 19:31:54
   line 170, col 8 to line 170, col 59 of module monitor: 48
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 186, col 20 to line 186, col 21 of module monitor: 36
+  line 191, col 11 to line 192, col 67 of module monitor: 57
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 186, col 24 to line 186, col 28 of module monitor: 36
+  line 193, col 11 to line 193, col 74 of module monitor: 57
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 189, col 14 to line 190, col 64 of module monitor: 84
+  line 209, col 20 to line 209, col 21 of module monitor: 36
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 191, col 26 to line 191, col 30 of module monitor: 84
+  line 209, col 24 to line 209, col 28 of module monitor: 36
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 206, col 8 to line 207, col 58 of module monitor: 120
+  line 212, col 14 to line 213, col 64 of module monitor: 84
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 208, col 20 to line 208, col 24 of module monitor: 120
+  line 214, col 26 to line 214, col 30 of module monitor: 84
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 229, col 11 to line 230, col 67 of module monitor: 57
+  line 229, col 8 to line 230, col 58 of module monitor: 120
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 231, col 11 to line 231, col 74 of module monitor: 57
+  line 231, col 20 to line 231, col 24 of module monitor: 120
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   line 93, col 8 to line 93, col 15 of module monitor: 72
@@ -87,7 +87,7 @@ The coverage statistics at 2018-10-29 19:31:54
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(11) at 2018-10-29 19:31:54: 455 states generated (4,829 s/min), 111 distinct states found (1,178 ds/min), 0 states left on queue.
+Progress(11) at 2018-10-30 19:04:37: 455 states generated (5,183 s/min), 111 distinct states found (1,264 ds/min), 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
 455 states generated, 111 distinct states found, 0 states left on queue.
@@ -99,5 +99,5 @@ The depth of the complete state graph search is 11.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 3 and the 95th percentile is 3).
 @!@!@ENDMSG 2268 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 5962ms at (2018-10-29 19:31:54)
+Finished in 5600ms at (2018-10-30 19:04:37)
 @!@!@ENDMSG 2186 @!@!@

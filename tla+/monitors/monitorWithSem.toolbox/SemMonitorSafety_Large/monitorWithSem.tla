@@ -168,7 +168,7 @@ Reduce(set, val) ==
 (*
 pass through
 *)    
-WaitB_1(t) ==
+WaitB_fast(t) ==
        ~Blocked(t)
     /\ Sem.counter > 0
     /\ MarkedCVWaiting(t) 
@@ -185,7 +185,7 @@ WaitB_1(t) ==
 (*
 physically sleep
 *)                        
-WaitB_2_1(t) ==
+WaitB_sleep(t) ==
        ~Blocked(t)
     /\ ~(t \in CV.signaled) /\ MarkedCVWaiting(t)
     /\ Sem.counter = 0   
@@ -195,7 +195,7 @@ WaitB_2_1(t) ==
 (*
 wake up from sem down
 *)                                       
-WaitB_2_2 (t) ==
+WaitB_wake (t) ==
        ~(t \in Mutex.waiters)
     /\ t \in CV.signaled /\ MarkedCVWaiting(t)
     /\ Sem.counter = 0
@@ -253,14 +253,16 @@ MSemNext ==
     \/ \E t \in THREADS :
        \/ Lock(t)
        \/ WaitA(t) 
-       \/ WaitB_1(t) \/ WaitB_2_1(t) \/ WaitB_2_2(t)
+       \/ WaitB_fast(t) \/ WaitB_sleep(t) \/ WaitB_wake(t)
        \/ Signal(t)
        \/ Broadcast(t)
 
 MSemSpec ==
     MSemInit 
     /\ [][MSemNext]_<<CV, Mutex, Sem, SignalCount, WaiterCount>> 
-    /\ WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(MSemNext)
+    /\ \A t \in THREADS:
+        WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(WaitB_fast(t))
+        /\ WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(WaitB_wake(t))
 
 MonitorSpec == INSTANCE monitor 
 
@@ -284,5 +286,5 @@ THEOREM MSemSpec => MonitorSpec!MSpec
  
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 30 12:38:01 PDT 2018 by junlongg
+\* Last modified Tue Oct 30 19:06:40 PDT 2018 by junlongg
 \* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg
