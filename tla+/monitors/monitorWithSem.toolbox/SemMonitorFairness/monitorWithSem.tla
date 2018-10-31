@@ -5,7 +5,6 @@ This spec shows a wrong implementation for using semaphore implementing monitors
 EXTENDS Integers
 
 CONSTANT THREADS (* a set of running threads *)
-CONSTANT SEMCOUNT (* limit the semaphore counts *)
        
 (* Util functions *)       
 RECURSIVE SetSize(_)
@@ -224,8 +223,7 @@ ComputeSem(Signaled) ==
        waiters |-> Sem.waiters \ pickedSubSet]
 
 Signal(t) ==
-       Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t) 
+       ~Blocked(t) /\ ~MarkedCVWaiting(t) 
     /\ Mutex.holder = {t} (* posix does not require that, but... *)
     /\ (WaiterCount > 0 /\ WaiterCount > SignalCount)
     /\ LET waiter == CHOOSE waiter \in (CV.waiters \ CV.signaled) : TRUE
@@ -237,8 +235,7 @@ Signal(t) ==
 
 
 Broadcast(t) ==
-       Sem.counter < SEMCOUNT
-    /\ ~Blocked(t) /\ ~MarkedCVWaiting(t)
+       ~Blocked(t) /\ ~MarkedCVWaiting(t)
     /\ Mutex.holder = {t} (* posix does not require that, but... *)
     /\ CV' = [ waiters  |-> CV.waiters,
                signaled |-> CV.signaled \union (CV.waiters \ CV.signaled)]
@@ -286,5 +283,5 @@ THEOREM MSemSpec => MonitorSpec!MSpec
  
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 30 19:06:40 PDT 2018 by junlongg
+\* Last modified Tue Oct 30 19:15:44 PDT 2018 by junlongg
 \* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg

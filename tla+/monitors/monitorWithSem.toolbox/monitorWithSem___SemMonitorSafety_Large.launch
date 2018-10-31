@@ -6,7 +6,7 @@
 <intAttribute key="dfidDepth" value="100"/>
 <booleanAttribute key="dfidMode" value="false"/>
 <intAttribute key="distributedFPSetCount" value="0"/>
-<stringAttribute key="distributedNetworkInterface" value="10.20.109.168"/>
+<stringAttribute key="distributedNetworkInterface" value="10.166.71.14"/>
 <intAttribute key="distributedNodesCount" value="1"/>
 <stringAttribute key="distributedTLC" value="off"/>
 <stringAttribute key="distributedTLCVMArgs" value=""/>
@@ -19,7 +19,7 @@
 <stringAttribute key="modelBehaviorNext" value=""/>
 <stringAttribute key="modelBehaviorSpec" value="MSemSpec"/>
 <intAttribute key="modelBehaviorSpecType" value="1"/>
-<stringAttribute key="modelBehaviorVars" value="Mutex, CV, Sem"/>
+<stringAttribute key="modelBehaviorVars" value="WaiterCount, SignalCount, CV, Sem, Mutex"/>
 <stringAttribute key="modelComments" value="Check basic properties of monitors using sem"/>
 <booleanAttribute key="modelCorrectnessCheckDeadlock" value="false"/>
 <listAttribute key="modelCorrectnessInvariants"/>
@@ -30,9 +30,8 @@
 <stringAttribute key="modelParameterActionConstraint" value=""/>
 <listAttribute key="modelParameterConstants">
 <listEntry value="THREADS;;{&quot;t1&quot;, &quot;t2&quot;, &quot;t3&quot;};0;0"/>
-<listEntry value="SEMCOUNT;;5;0;0"/>
 </listAttribute>
-<stringAttribute key="modelParameterContraint" value=""/>
+<stringAttribute key="modelParameterContraint" value="Sem.counter &lt; 5"/>
 <listAttribute key="modelParameterDefinitions"/>
 <stringAttribute key="modelParameterModelValues" value="{}"/>
 <stringAttribute key="modelParameterNewDefinitions" value=""/>

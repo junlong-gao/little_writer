@@ -12,11 +12,6 @@ SetSize(set) ==
 (*Pop Back*)
 Pop(seq) == 
   [j \in 1..(Len(seq)-1) |->  seq[j] ]
-
-RECURSIVE PopN(_, _)
-PopN(n, queue) ==
-   IF n = 0 \/ Len(queue) = 0 THEN queue
-   ELSE PopN(n - 1, Pop(queue))
    
 RECURSIVE FlattenSet(_)
 FlattenSet(ss) ==
@@ -109,6 +104,8 @@ MonitorConservative ==
       of the threads registered for CV wait
    *)
    /\ FlattenSet({ThreadLocalSem[t].waiters : t \in THREADS}) \subseteq CV.waiters
+   /\ (\A t \in THREADS:
+         ThreadLocalSem[t].counter > 0 => t \in CV.signaled)
 
 (**** HELPFUL STATE CHECKS ****)
 (* State Assertions *) 
@@ -275,5 +272,5 @@ THEOREM MSemQSpec => MonitorSpec!MSpec
 
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 30 18:58:17 PDT 2018 by junlongg
+\* Last modified Tue Oct 30 19:11:49 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg
