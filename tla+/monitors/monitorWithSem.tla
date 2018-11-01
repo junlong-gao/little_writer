@@ -105,14 +105,6 @@ threads starts waiting one after another, but there is no liveness violation her
 Liveness says system must resolve if there is a signal delivered to a waiting thread,
 and does not care cases where no signal is delivered at all.
 *)   
-
-(* signal is done in two steps: register for signalling (required for
-   the spec to track liveness) then resolve those by unblocking the
-   threads that are physically blocked.
-   
-   Signal is made into semantically a single step because no other threads can
-   make progress if a signal and broadcast is called before it is resolved.
-*)
     
 (* Init states *)
 MSemInit ==
