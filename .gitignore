@@ -1,2 +1,7 @@
 *.glob
 *.vo
+
+*Snapshot*
+
+*.swp
+*.swo
