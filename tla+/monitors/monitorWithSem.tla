@@ -41,7 +41,7 @@ SemNonNeg ==
 
 SemWaitAfterCVWaitReg ==
    Sem.waiters \subseteq CV.waiters
-   
+
 VARIABLE WaiterCount
 VARIABLE SignalCount
 CounterTypeOK ==
@@ -49,8 +49,6 @@ CounterTypeOK ==
    /\ SignalCount \in Nat
 
 (**** BODY OF THE SPEC ****)
-(* Some helper checkers *)
-(* logically blocked by CV *)
 
 (* physically blocked by CV wait or in Lock wait queue *)
 Blocked(t) ==
@@ -67,7 +65,7 @@ Liveness says system must resolve if there is a signal delivered to a waiting th
 and does not care cases where no signal is delivered at all.
 *)
 
-(* Init states *)
+(**** Init States ****)
 MSemInit ==
         CV = [ waiters |-> {}, signaled |-> {} ]
      /\ Mutex = [ holder |-> {}, waiters |-> {} ]
@@ -98,6 +96,7 @@ Unlock(t) ==
 (*
 Wait cannot release lock and wait on sem atomically
 *)
+
 WaitA(t) ==
        ~Blocked(t) /\ ~MarkedCVWaiting(t)
     /\ Mutex.holder = {t}
@@ -109,17 +108,19 @@ WaitA(t) ==
     /\ WaiterCount' = WaiterCount + 1
 
 (*
-reduce the set size by 1 by removing any element determinisitcally
-if val is not in the set
+Reduce the set size by 1 by removing any element deterministically if val is
+not in the set.
 *)
+
 Reduce(set, val) ==
     IF SetSize(set) = 0 THEN set
     ELSE IF val \in set THEN set \ {val}
          ELSE LET picked == CHOOSE x \in set : TRUE
               IN set \ {picked}
 (*
-pass through
+Pass through since semaphore count is positive.
 *)
+
 WaitB_fast(t) ==
        ~Blocked(t)
     /\ Sem.counter > 0
@@ -128,15 +129,17 @@ WaitB_fast(t) ==
                 waiters |-> Sem.waiters ]
     (* decrease both the counters *)
     /\ CV' = [ waiters |-> CV.waiters \ {t},
-               signaled |-> Reduce(CV.signaled, t) ] (* <---- this is why the impl is wrong, it is a counter *)
+              (* This is why the implementation is wrong. *)
+               signaled |-> Reduce(CV.signaled, t) ]
     /\ WaiterCount' = WaiterCount - 1
     /\ SignalCount' = SignalCount - 1
     /\ Mutex' = [ holder |-> {},
                   waiters |-> Mutex.waiters \union {t} ]
 
 (*
-physically sleep
+Physically sleep as the count is 0.
 *)
+
 WaitB_sleep(t) ==
        ~Blocked(t)
     /\ ~(t \in CV.signaled) /\ MarkedCVWaiting(t)
@@ -144,8 +147,9 @@ WaitB_sleep(t) ==
     /\ Sem' = [ counter |-> 0,
                 waiters |-> Sem.waiters \union {t} ]
     /\ UNCHANGED<<CV, Mutex, WaiterCount, SignalCount>>
+
 (*
-wake up from sem down
+Wake up from semaphore down.
 *)
 WaitB_wake (t) ==
        ~(t \in Mutex.waiters)
@@ -162,12 +166,14 @@ WaitB_wake (t) ==
 
 (*
 Apply signal for all the threads that signal just delivered:
-1. unblock the threads in the sem.waiters by using CV.signaled,
+1. Unblock the threads in the sem.waiters by using CV.signaled,
    they are unblocked from CV.wait and go to lock competition
-2. if there is still count remains, add them to sem.counter.
-   they can be used by threads registered for CV wait but have
+
+2. If there is still count remains, add them to sem.counter.
+   They can be used by threads registered for CV wait but have
    not called sem.down yet.
 *)
+
 ComputeSem(Signaled) ==
   LET minVal == MinOfTwoInt(SetSize(Sem.waiters), SetSize(Signaled))
   IN LET pickedSubSet == ChooseN(minVal, Sem.waiters)
@@ -197,7 +203,7 @@ Broadcast(t) ==
     /\ SignalCount' = SetSize(CV.waiters)
 
 
-(**** The complete spec ****)
+(**** The Complete Spec ****)
 MSemNext ==
     LockResolve
     \/ \E t \in THREADS :
@@ -214,6 +220,7 @@ MSemSpec ==
         WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(WaitB_fast(t))
         /\ WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(WaitB_wake(t))
 
+(**** Implementation Specific Invariant ****)
 MSemSpecInv ==
     MonitorInv
     /\ SemTypeOK /\ SemNonNeg /\ SemWaitAfterCVWaitReg
