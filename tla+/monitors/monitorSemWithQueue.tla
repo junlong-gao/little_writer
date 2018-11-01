@@ -1,6 +1,6 @@
 ------------------------ MODULE monitorSemWithQueue ------------------------
 
-EXTENDS Integers, Sequences
+EXTENDS Integers, Sequences, monitor
 
 (**** UTILITIES ****)  
 RECURSIVE SetSize(_)
@@ -32,33 +32,9 @@ Push(v, seq) ==
 (* get front *) 
 Front(seq) == seq[1]               
                          
-CONSTANT THREADS (* a set of running threads *)
-
 (**** MODEL VARIABLES ****)   
 (* a mutex is a function (struct) maps from {holder, waiters} to
    sets of threads *)
-VARIABLE Mutex
-MutexTypeOK ==
-   DOMAIN Mutex = {"holder", "waiters"}
-   /\ Mutex.holder \subseteq THREADS
-   /\ Mutex.waiters \subseteq THREADS
-
-MutualExclusion ==
-      Mutex.holder = {}
-   \/ \E t \in THREADS : Mutex.holder = {t}
-
-(*
-There is no CV. The CV modelled here is implmented using a queue of sem,
-see wait and signal/broadcast below.
-*)
-VARIABLE CV
-CVTypeOK ==
-    DOMAIN CV = {"waiters", "signaled"}
-    /\ CV.waiters \subseteq THREADS
-    /\ CV.signaled \subseteq THREADS
-
-CVMemoryLess ==
-   CV.signaled \subseteq CV.waiters
 
 (*
 Model a queue of threads that emplaced their local semaphore
@@ -83,15 +59,8 @@ ThreadLocalSemTypeOK ==
 (*
 Monitors only move threads around, not duplicating them.
 *)
-MonitorConservative ==
-      ( Mutex.waiters \intersect Mutex.holder = {} )
-      
-   /\ ( Mutex.waiters \intersect CV.waiters = {} )
-   /\ ( Mutex.holder \intersect CV.waiters = {} )
-   
-   /\ ( Mutex.waiters \intersect CV.signaled = {} )
-   /\ ( Mutex.holder \intersect CV.signaled = {} )
-   
+SemConservative ==
+      MonitorConservative
    /\ (\A t \in THREADS :
           /\ ( Mutex.waiters \intersect ThreadLocalSem[t].waiters = {} )
           /\ ( Mutex.holder \intersect ThreadLocalSem[t].waiters = {} )
@@ -114,11 +83,6 @@ Blocked(t) ==
       t \in ThreadLocalSem[t].waiters
    \/ t \in Mutex.waiters
    
-(* waiting is done in two steps. A thread is logically blocked
-if it calls cv wait and before calling sem down, and is physically blocked
-if it ends up in a sem queue *)    
-MarkedCVWaiting(t) ==
-   t \in CV.waiters
 
 (**** THE STATE TRANSITIONS ****)   
 (* Init states *)
@@ -253,24 +217,11 @@ MSemQSpec ==
         WF_<<CV, Mutex, SemQ, ThreadLocalSem>>(WaitB_wake(t))
         /\ WF_<<CV, Mutex, SemQ, ThreadLocalSem>>(WaitB_fast(t))
 
-MonitorSpec == INSTANCE monitor
-
-MonitorInv ==
-       MutexTypeOK /\ CVTypeOK /\ SemTypeOK /\ ThreadLocalSemTypeOK
-    /\ CVMemoryLess /\ MutualExclusion
-    /\ MonitorConservative
-
-(**** SAFETY CONSTRAINT ****)
-MonitorSafety == 
-   MonitorSpec!MonitorSafety
-   /\ [][MonitorInv]_<<CV, Mutex, SemQ, ThreadLocalSem>>
-
-(**** LIVENESS CONSTRAINT ****)
-CVSignalFairness == MonitorSpec!CVSignalFairness
-
-THEOREM MSemQSpec => MonitorSpec!MSpec
+MSemQSpecInv ==
+       MonitorInv
+    /\ SemConservative
 
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 30 19:11:49 PDT 2018 by junlongg
+\* Last modified Thu Nov 01 00:46:11 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg

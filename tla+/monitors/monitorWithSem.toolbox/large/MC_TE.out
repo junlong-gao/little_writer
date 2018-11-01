@@ -2,7 +2,7 @@
 TLC2 Version 2.13 of 18 July 2018
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with seed -24260426522543221 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
+Running breadth-first search Model-Checking with seed -8269464912643365614 with 4 workers on 8 cores with 1214MB heap and 2730MB offheap memory (Mac OS X 10.14.1 x86_64, Oracle Corporation 1.8.0_191 x86_64).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
@@ -11,8 +11,8 @@ Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorWithSem.toolbox/
 Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorWithSem.toolbox/SemMonitorSafety_Large/monitorWithSem.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/TLC.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/Integers.tla
-Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/Naturals.tla
 Parsing file /Users/junlongg/little_writer/tla+/monitors/monitorWithSem.toolbox/SemMonitorSafety_Large/monitor.tla
+Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/Naturals.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/Sequences.tla
 Parsing file /Applications/TLA+ Toolbox.app/Contents/Eclipse/plugins/org.lamport.tlatools_1.0.0.201807180447/tla2sany/StandardModules/FiniteSets.tla
 Semantic processing of module Naturals
@@ -27,7 +27,7 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2018-10-30 19:17:25)
+Starting... (2018-11-01 00:42:19)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2189:0 @!@!@
 Computing initial states...
@@ -40,136 +40,136 @@ Model checking completed. No error has been found.
   Estimates of the probability that TLC did not check all reachable states
   because two distinct states had the same fingerprint:
   calculated (optimistic):  val = 6.4E-15
-  based on the actual fingerprints:  val = 2.5E-15
+  based on the actual fingerprints:  val = 6.4E-15
 @!@!@ENDMSG 2193 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2018-10-30 19:17:31
+The coverage statistics at 2018-11-01 00:42:25
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 128, col 19 to line 128, col 20 of module monitorWithSem: 114
+  line 104, col 8 to line 105, col 41 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 128, col 23 to line 128, col 25 of module monitorWithSem: 114
+  line 106, col 8 to line 107, col 44 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 128, col 28 to line 128, col 38 of module monitorWithSem: 114
+  line 108, col 19 to line 108, col 21 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 128, col 41 to line 128, col 51 of module monitorWithSem: 114
+  line 108, col 24 to line 108, col 34 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 129, col 8 to line 129, col 81 of module monitorWithSem: 114
+  line 109, col 8 to line 109, col 37 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 135, col 11 to line 136, col 57 of module monitorWithSem: 73
+  line 127, col 8 to line 128, col 41 of module monitorWithSem: 96
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 137, col 19 to line 137, col 20 of module monitorWithSem: 73
+  line 130, col 8 to line 131, col 52 of module monitorWithSem: 96
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 137, col 23 to line 137, col 25 of module monitorWithSem: 73
+  line 132, col 8 to line 132, col 37 of module monitorWithSem: 96
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 137, col 28 to line 137, col 38 of module monitorWithSem: 73
+  line 133, col 8 to line 133, col 37 of module monitorWithSem: 96
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 137, col 41 to line 137, col 51 of module monitorWithSem: 73
+  line 134, col 8 to line 135, col 56 of module monitorWithSem: 96
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 151, col 8 to line 152, col 41 of module monitorWithSem: 99
+  line 144, col 8 to line 145, col 52 of module monitorWithSem: 105
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 153, col 8 to line 154, col 44 of module monitorWithSem: 99
+  line 146, col 19 to line 146, col 20 of module monitorWithSem: 105
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 155, col 19 to line 155, col 21 of module monitorWithSem: 99
+  line 146, col 23 to line 146, col 27 of module monitorWithSem: 105
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 155, col 24 to line 155, col 34 of module monitorWithSem: 99
+  line 146, col 30 to line 146, col 40 of module monitorWithSem: 105
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 156, col 8 to line 156, col 37 of module monitorWithSem: 99
+  line 146, col 43 to line 146, col 53 of module monitorWithSem: 105
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 174, col 8 to line 175, col 41 of module monitorWithSem: 96
+  line 155, col 19 to line 155, col 21 of module monitorWithSem: 87
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 177, col 8 to line 178, col 52 of module monitorWithSem: 96
+  line 156, col 8 to line 157, col 47 of module monitorWithSem: 87
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 179, col 8 to line 179, col 37 of module monitorWithSem: 96
+  line 158, col 8 to line 158, col 37 of module monitorWithSem: 87
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 180, col 8 to line 180, col 37 of module monitorWithSem: 96
+  line 159, col 8 to line 159, col 37 of module monitorWithSem: 87
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 181, col 8 to line 182, col 56 of module monitorWithSem: 96
+  line 160, col 8 to line 161, col 56 of module monitorWithSem: 87
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 191, col 8 to line 192, col 52 of module monitorWithSem: 105
+  line 183, col 11 to line 184, col 59 of module monitorWithSem: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 193, col 19 to line 193, col 20 of module monitorWithSem: 105
+  line 185, col 14 to line 185, col 43 of module monitorWithSem: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 193, col 23 to line 193, col 27 of module monitorWithSem: 105
+  line 186, col 14 to line 186, col 40 of module monitorWithSem: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 193, col 30 to line 193, col 40 of module monitorWithSem: 105
+  line 187, col 25 to line 187, col 29 of module monitorWithSem: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 193, col 43 to line 193, col 53 of module monitorWithSem: 105
+  line 187, col 32 to line 187, col 42 of module monitorWithSem: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 202, col 19 to line 202, col 21 of module monitorWithSem: 87
+  line 193, col 8 to line 194, col 74 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 203, col 8 to line 204, col 47 of module monitorWithSem: 87
+  line 195, col 8 to line 195, col 50 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 205, col 8 to line 205, col 37 of module monitorWithSem: 87
+  line 196, col 20 to line 196, col 24 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 206, col 8 to line 206, col 37 of module monitorWithSem: 87
+  line 196, col 27 to line 196, col 37 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 207, col 8 to line 208, col 56 of module monitorWithSem: 87
+  line 197, col 8 to line 197, col 41 of module monitorWithSem: 99
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 230, col 11 to line 231, col 59 of module monitorWithSem: 54
+  line 81, col 19 to line 81, col 20 of module monitorWithSem: 114
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 232, col 14 to line 232, col 43 of module monitorWithSem: 54
+  line 81, col 23 to line 81, col 25 of module monitorWithSem: 114
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 233, col 14 to line 233, col 40 of module monitorWithSem: 54
+  line 81, col 28 to line 81, col 38 of module monitorWithSem: 114
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 234, col 25 to line 234, col 29 of module monitorWithSem: 54
+  line 81, col 41 to line 81, col 51 of module monitorWithSem: 114
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 234, col 32 to line 234, col 42 of module monitorWithSem: 54
+  line 82, col 8 to line 82, col 81 of module monitorWithSem: 114
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 240, col 8 to line 241, col 74 of module monitorWithSem: 99
+  line 88, col 11 to line 89, col 57 of module monitorWithSem: 73
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 242, col 8 to line 242, col 50 of module monitorWithSem: 99
+  line 90, col 19 to line 90, col 20 of module monitorWithSem: 73
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 243, col 20 to line 243, col 24 of module monitorWithSem: 99
+  line 90, col 23 to line 90, col 25 of module monitorWithSem: 73
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 243, col 27 to line 243, col 37 of module monitorWithSem: 99
+  line 90, col 28 to line 90, col 38 of module monitorWithSem: 73
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 244, col 8 to line 244, col 41 of module monitorWithSem: 99
+  line 90, col 41 to line 90, col 51 of module monitorWithSem: 73
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2202:0 @!@!@
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(14) at 2018-10-30 19:17:31: 728 states generated (7,038 s/min), 244 distinct states found (2,359 ds/min), 0 states left on queue.
+Progress(14) at 2018-11-01 00:42:25: 728 states generated (7,356 s/min), 244 distinct states found (2,465 ds/min), 0 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
 728 states generated, 244 distinct states found, 0 states left on queue.
@@ -181,5 +181,5 @@ The depth of the complete state graph search is 14.
 The average outdegree of the complete state graph is 1 (minimum is 0, the maximum 3 and the 95th percentile is 3).
 @!@!@ENDMSG 2268 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 6579ms at (2018-10-30 19:17:31)
+Finished in 6274ms at (2018-11-01 00:42:25)
 @!@!@ENDMSG 2186 @!@!@

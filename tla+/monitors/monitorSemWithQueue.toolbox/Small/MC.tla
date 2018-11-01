@@ -2,22 +2,26 @@
 EXTENDS monitorSemWithQueue, TLC
 
 \* CONSTANT definitions @modelParameterConstants:0THREADS
-const_154095191386848000 == 
+const_154105843461289000 == 
 {"t1", "t2"}
 ----
 
 \* SPECIFICATION definition @modelBehaviorSpec:0
-spec_154095191386849000 ==
+spec_154105843461290000 ==
 MSemQSpec
 ----
+\* INVARIANT definition @modelCorrectnessInvariants:0
+inv_154105843461291000 ==
+MSemQSpecInv
+----
 \* PROPERTY definition @modelCorrectnessProperties:0
-prop_154095191386850000 ==
+prop_154105843461292000 ==
 MonitorSafety
 ----
 \* PROPERTY definition @modelCorrectnessProperties:1
-prop_154095191386851000 ==
-CVSignalFairness
+prop_154105843461293000 ==
+MonitorLiveness
 ----
 =============================================================================
 \* Modification History
-\* Created Tue Oct 30 19:11:53 PDT 2018 by junlongg
+\* Created Thu Nov 01 00:47:14 PDT 2018 by junlongg

@@ -19,12 +19,14 @@
 <stringAttribute key="modelBehaviorNext" value=""/>
 <stringAttribute key="modelBehaviorSpec" value="MSemQSpec"/>
 <intAttribute key="modelBehaviorSpecType" value="1"/>
-<stringAttribute key="modelBehaviorVars" value="SemQ, CV, ThreadLocalSem, Mutex"/>
+<stringAttribute key="modelBehaviorVars" value="Mutex, SemQ, CV, ThreadLocalSem"/>
 <stringAttribute key="modelComments" value="Large set"/>
 <booleanAttribute key="modelCorrectnessCheckDeadlock" value="false"/>
-<listAttribute key="modelCorrectnessInvariants"/>
+<listAttribute key="modelCorrectnessInvariants">
+<listEntry value="1MSemQSpecInv"/>
+</listAttribute>
 <listAttribute key="modelCorrectnessProperties">
-<listEntry value="1CVSignalFairness"/>
+<listEntry value="1MonitorLiveness"/>
 <listEntry value="1MonitorSafety"/>
 </listAttribute>
 <stringAttribute key="modelExpressionEval" value=""/>
