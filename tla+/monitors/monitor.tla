@@ -14,12 +14,22 @@ being the signaled.
 VARIABLE Mutex
 MutexDomain ==
    DOMAIN Mutex = {"holder", "waiters"}
-
+   
+MutexTypeOK ==
+   DOMAIN Mutex = {"holder", "waiters"}
+   /\ Mutex.holder \subseteq THREADS
+   /\ Mutex.waiters \subseteq THREADS
+   
 MutualExclusion ==
       Mutex.holder = {}
    \/ \E t \in THREADS : Mutex.holder = {t}
 
 VARIABLE CV
+CVTypeOK ==
+    DOMAIN CV = {"waiters", "signaled"}
+    /\ CV.waiters \subseteq THREADS
+    /\ CV.signaled \subseteq THREADS
+    
 CVDomain ==
     DOMAIN CV = {"waiters", "signaled"}
 
@@ -46,220 +56,13 @@ MonitorConservative ==
    /\ ( Mutex.waiters \intersect CV.signaled = {} )
    /\ ( Mutex.holder \intersect CV.signaled = {} )
 
-(*
-This is the invariant of the monitors.
-*)
-MonitorTypeInv ==
-       CVDomain /\ CVMemoryLess
-    /\ MutexDomain /\ MutualExclusion
-    /\ MonitorConservative
-
-(*
-A thread is blocked if it appears in either of the waiting sets
-
-The negation of it is used as a part of the enabling condition.
-
-If t is in the mutex waiter or cv waiter, then this is no op since a thread in
-the waiter state cannot  do anything but wait.
-This will naturally leads to deadlock execution if everyone is no longer enabled.
-
-Curiously, we only have one lock in the model, and we do not allow locking
-when the thread is the owner of the lock. Thus we cannot result in this trivial
-deadlock.
-
-Indeed, we have mode interesting properties to check regarding to CV, not mutex.
-*)
-Blocked(t) ==
+MarkedCVWaiting(t) ==
    t \in CV.waiters
-   \/ t \in Mutex.waiters
-
+   
 (**** Init states ****)
 MInit ==
         CV = [ waiters |-> {}, signaled |-> {} ]
      /\ Mutex = [ holder |-> {}, waiters |-> {} ]
-
-(**** State Transitions ****)
-
-(*
-- Lock(t)
-Enabling condition:
-1. not Blocked(t).
-2. t is not the current lock holder
-
-Next step:
-Add t to the waiters set. This is the relaxed locking semantics (still correct, but
-allows to express more subtle states in real world). See LockResolve step below.
-*)
-
-Lock(t) ==
-    ~Blocked(t)
-    /\ ~(t \in Mutex.holder)
-    /\ CV' = CV
-    /\ Mutex' = [ holder |-> Mutex.holder, waiters |-> Mutex.waiters \union {t} ]
-
-(*
-If the system has entered the state that there is some waiter for lock and
-no one is holding it, automatically resolve it to one waiter.
-
-This is required for both lock acquiring and CV signal. For CV signal, we need
-to be able to express the state where a thread just gets woken up from wait,
-but not yet become the owner of the lock.
-Instead of duplicating the lock logic, we allow a transient state where lock is
-not held by anyone and there are a few waiters. And system can choose to
-resolve this state at any time automatically as long as this enable condition
-is met.
-
-This is really more closer to the real world behavior, where if we see a thread
-calling "lock" we don't assume it acquires the lock immediately. We go into the
-reasoning of
-1) there is no holder, so it becomes the owner,
-2) there is a holder, so it waits and becomes the owner later.
-But this is semantically the same same as
-1) Regardless of holder, becomes waiter first,
-2) If/until there is not holder, become holder.
-
-This is another reason why putting mutex and CV together as monitors makes a
-more realistic model.
-
-Enabling condition:
-There are some waiters and no holder of the lock.
-
-Next step:
-Pick anyone to become the holder of the lock and remove it from waiter queue.
-*)
-
-LockResolve ==
-   ~(Mutex.waiters = {})
-   /\ (Mutex.holder = {})
-   /\ LET waiter == CHOOSE waiter \in Mutex.waiters : TRUE
-      IN  Mutex' = [holder |-> {waiter},
-                    waiters |-> Mutex.waiters \ {waiter}]
-   /\ UNCHANGED <<CV>>
-
-(*
-- Unlock(t) where t is in threads
-Enabling condition:
-t is not blocked and is the holder of the lock.
-
-Next step:
-If t is in the holder, remove it from holder set.
-
-(For example, unlocking a not owned lock is not doing anything meaningful to
-the system state's evolution. The actual runtime implementation can choose to
-panic or throw exception)
-*)
-
-Unlock(t) ==
-    ~Blocked(t)
-    /\ Mutex.holder = {t}
-    /\ Mutex' = [holder |-> {}, waiters |-> Mutex.waiters]
-    /\ UNCHANGED <<CV>>
-
-(*
-Enabling condition:
-1. t not blocked
-2. t is the holder of the lock (In POSIX, we just exclude waiting without
-holding lock from all possible states in the model checking. They are undefined
-behavior in POSIX anyway.)
-
-Next step:
-Atomically move t from holder to CV. (!!)
-*)
-
-Wait(t) ==
-    ~Blocked(t)
-    /\ Mutex.holder = {t}
-    /\ CV' = [ waiters |-> CV.waiters \union {t}, signaled |-> CV.signaled ]
-    /\ Mutex' = [ holder |-> {}, waiters |-> Mutex.waiters]
-
-(*
-This is added to allow us to express the fact that
-"A thread waited in some state and then is signaled in some state by another
-thread".
-
-In POSIX, there is no requirement on whether the signaled thread should
-immediately get lock or appear in some position in the lock queue (see Mesa
-semantics). A signalled thread cannot put itself on wait again before it is
-resolved from sleeping (woken) and attempts to get the lock. Therefore, it is
-allowed to have some delay between getting signaled and being put on lock's
-wait set.
-
-Enabling condition:
-signaled set not empty
-
-Step:
-Remove these signaled from waiters in CV and put them
-into waiters of Lock.
-*)
-
-Wakeup ==
-      ~ (CV.signaled = {})
-      /\  Mutex' = [ holder  |-> Mutex.holder,
-                     waiters |-> Mutex.waiters \union CV.signaled ]
-      /\  CV' = [ waiters |-> CV.waiters \  CV.signaled, signaled |-> {} ]
-
-(*
-Enabling condition:
-t not blocked.
-
-Next step:
-If CV is empty, this is no op, otherwise, choose ANY of the thread in CV
-to move it to mutex.waiters.
-Curiously it is not required to hold lock as part of the enabling conditions.
-*)
-
-Signal(t) ==
-    ~Blocked(t)
-    /\ IF CV.waiters = {}
-       THEN
-       UNCHANGED <<CV, Mutex>>
-       ELSE
-       LET waiter == CHOOSE waiter \in CV.waiters : TRUE
-       IN    CV' = [ waiters  |-> CV.waiters,
-                     signaled |-> CV.signaled \union { waiter }]
-          /\ UNCHANGED <<Mutex>>
-
-
-(*
-Enabling condition:
-t not blocked.
-
-Next step:
-If CV is empty, this is no op, otherwise, choose ALL of the thread in CV
-to move it to mutex.waiters
-Curiously it is not required to hold lock as part of the enabling conditions.
-*)
-Broadcast(t) ==
-    ~Blocked(t)
-    /\ CV' = [ waiters  |-> CV.waiters,
-               signaled |-> CV.signaled \union CV.waiters]
-    /\ UNCHANGED <<Mutex>>
-
-
-(**** The Complete Spec ****)
-
-(*
-MNext describes how system may evolve given any current state.
-*)
-
-MNext ==
-    LockResolve
-    \/ Wakeup
-    \/ \E t \in THREADS :
-       \/ Lock(t)
-       \/ Wait(t)
-       \/ Signal(t)
-       \/ Broadcast(t)
-
-(*
-MSpec describes all the allowed behaviors as well as excluding behaviors
-containing trivial infinite stuttering steps using weak fairness constraint.
-*)
-
-MSpec ==
-    MInit /\ [][MNext]_<<CV, Mutex>> /\ WF_<<CV, Mutex>>(Wakeup)
-
-(**** Constraints ****)
 
 (*
 This is the non-trivial safety property for CV wait and signal: for every thread
@@ -269,10 +72,6 @@ that received signal, it must called Wait() on CV before.
 CVWaitCorrectness ==
     \A t \in THREADS:
        (t \in CV'.signaled) => (t \in CV.signaled \/ t \in CV.waiters)
-
-MonitorSafety ==
-   [][CVWaitCorrectness]_<<CV, Mutex>>
-   /\ [][MonitorTypeInv]_<<CV, Mutex>>
 
 (*
 This is one of the non-trivial liveness property any monitor spec must satisfy.
@@ -288,16 +87,20 @@ CVSignalFairness ==
     \A t \in THREADS:
         (t \in CV.signaled) ~> (t \in Mutex.waiters)
 
+(* Temporal Properties to Check *)
+MonitorSafety ==
+   [][CVWaitCorrectness]_<<CV, Mutex>>
+
 MonitorLiveness ==
     CVSignalFairness
 
-(*
-We cannot check this, but this is the goal for any implementation of
-monitors: a correct monitor implementation should satisfy the safety
-property and liveness property
-*)
-THEOREM MSpec => MonitorSafety /\ MonitorLiveness
+(* Invariants to Check *)
+MonitorInv ==
+       CVDomain /\ CVMemoryLess
+    /\ MutexDomain /\ MutualExclusion
+    /\ MonitorConservative
+    
 =============================================================================
 \* Modification History
-\* Last modified Tue Oct 30 19:04:00 PDT 2018 by junlongg
+\* Last modified Thu Nov 01 00:33:26 PDT 2018 by junlongg
 \* Created Sun Oct 28 16:06:17 PDT 2018 by junlongg
