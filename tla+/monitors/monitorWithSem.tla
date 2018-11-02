@@ -50,25 +50,15 @@ CounterTypeOK ==
 
 (**** BODY OF THE SPEC ****)
 
-(* physically blocked by CV wait or in Lock wait queue *)
+(* Physically blocked by CV wait or in Mutex wait queue *)
+
 Blocked(t) ==
    t \in Sem.waiters
    \/ t \in Mutex.waiters
 
-(*
-IsTrivialWait(t) ==
-   {t} = THREADS \ Sem.waiters
-
-Do we need this? No. TLA+ can easily generate a behavior where two of the
-threads starts waiting one after another, but there is no liveness violation here.
-Liveness says system must resolve if there is a signal delivered to a waiting thread,
-and does not care cases where no signal is delivered at all.
-*)
-
 (**** Init States ****)
 MSemInit ==
-        CV = [ waiters |-> {}, signaled |-> {} ]
-     /\ Mutex = [ holder |-> {}, waiters |-> {} ]
+        MInit
      /\ Sem = [ counter |-> 0, waiters |-> {} ]
      /\ WaiterCount = 0
      /\ SignalCount = 0
@@ -129,7 +119,13 @@ WaitB_fast(t) ==
                 waiters |-> Sem.waiters ]
     (* decrease both the counters *)
     /\ CV' = [ waiters |-> CV.waiters \ {t},
-              (* This is why the implementation is wrong. *)
+    (* This is why the implementation is wrong: signal can be stolen and the
+    liveness constraint is violated.
+    Note it is very difficult to think about this case in the original C++
+    implementation as there is no set tracked, only the counters. In the model
+    both sets and the counters are tracked and the counter = set size invariant
+    must be maintained, thus the error is apparent here.
+    *)
                signaled |-> Reduce(CV.signaled, t) ]
     /\ WaiterCount' = WaiterCount - 1
     /\ SignalCount' = SignalCount - 1
@@ -151,6 +147,7 @@ WaitB_sleep(t) ==
 (*
 Wake up from semaphore down.
 *)
+
 WaitB_wake (t) ==
        ~(t \in Mutex.waiters)
     /\ t \in CV.signaled /\ MarkedCVWaiting(t)
@@ -165,9 +162,9 @@ WaitB_wake (t) ==
                   waiters |-> Mutex.waiters \union {t} ]
 
 (*
-Apply signal for all the threads that signal just delivered:
-1. Unblock the threads in the sem.waiters by using CV.signaled,
-   they are unblocked from CV.wait and go to lock competition
+Apply signals for all the threads that the signals were just delivered to:
+1. Unblock the threads in the sem.waiters.
+   They will be unblocked from CV.wait and go to lock competition
 
 2. If there is still count remains, add them to sem.counter.
    They can be used by threads registered for CV wait but have
@@ -183,7 +180,11 @@ ComputeSem(Signaled) ==
 
 Signal(t) ==
        ~Blocked(t) /\ ~MarkedCVWaiting(t)
-    /\ Mutex.holder = {t} (* posix does not require that, but... *)
+    (*
+    POSIX does not require that, but to show this implementation is wrong even
+    with lock held calling signal.
+     *)
+    /\ Mutex.holder = {t}
     /\ (WaiterCount > 0 /\ WaiterCount > SignalCount)
     /\ LET waiter == CHOOSE waiter \in (CV.waiters \ CV.signaled) : TRUE
        IN CV'= [ waiters  |-> CV.waiters,
@@ -195,7 +196,11 @@ Signal(t) ==
 
 Broadcast(t) ==
        ~Blocked(t) /\ ~MarkedCVWaiting(t)
-    /\ Mutex.holder = {t} (* posix does not require that, but... *)
+    (*
+    POSIX does not require that, but to show this implementation is wrong even
+    with lock held calling broadcast.
+     *)
+    /\ Mutex.holder = {t}
     /\ CV' = [ waiters  |-> CV.waiters,
                signaled |-> CV.signaled \union (CV.waiters \ CV.signaled)]
     /\ Sem' = ComputeSem(CV.waiters \ CV.signaled)
@@ -204,6 +209,7 @@ Broadcast(t) ==
 
 
 (**** The Complete Spec ****)
+
 MSemNext ==
     LockResolve
     \/ \E t \in THREADS :
@@ -221,6 +227,7 @@ MSemSpec ==
         /\ WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(WaitB_wake(t))
 
 (**** Implementation Specific Invariant ****)
+
 MSemSpecInv ==
     MonitorInv
     /\ SemTypeOK /\ SemNonNeg /\ SemWaitAfterCVWaitReg

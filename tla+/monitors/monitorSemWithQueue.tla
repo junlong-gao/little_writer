@@ -55,6 +55,7 @@ ThreadLocalSemTypeOK ==
    /\ \A t \in THREADS :
           ~(ThreadLocalSem[t].counter < 0) /\ ~(ThreadLocalSem[t].counter > 1)
        /\ (~(ThreadLocalSem[t].waiters = {}) => ThreadLocalSem[t].counter = 0)
+       /\ (SetSize(ThreadLocalSem[t].waiters) = 0 \/ SetSize(ThreadLocalSem[t].waiters) = 1)
 
 SemConservative ==
       MonitorConservative
@@ -66,8 +67,8 @@ SemConservative ==
       registered for CV wait. *)
    /\ (Len(SemQ) < SetSize(CV.waiters) \/ Len(SemQ) = SetSize(CV.waiters))
 
-   (* And those that are physically blocked by semaphore is a subset
-      of the threads registered for CV wait
+   (* And those are physically blocked by semaphore is a subset
+      of the threads registered for CV wait.
    *)
    /\ FlattenSet({ThreadLocalSem[t].waiters : t \in THREADS}) \subseteq CV.waiters
    /\ (\A t \in THREADS:
@@ -84,8 +85,7 @@ Blocked(t) ==
 
 (**** Init States ****)
 MSemQInit ==
-        CV = [ waiters |-> {}, signaled |-> {} ]
-     /\ Mutex = [ holder |-> {}, waiters |-> {} ]
+        MInit
      /\ SemQ = <<>>
      /\ ThreadLocalSem = [t \in THREADS |-> [counter |-> 0, waiters |-> {}]]
 
@@ -215,5 +215,5 @@ MSemQSpecInv ==
 
 =============================================================================
 \* Modification History
-\* Last modified Thu Nov 01 00:46:11 PDT 2018 by junlongg
+\* Last modified Thu Nov 01 12:50:26 PDT 2018 by junlongg
 \* Created Mon Oct 29 13:23:27 PDT 2018 by junlongg
