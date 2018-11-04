@@ -1,18 +1,12 @@
---------------------------- MODULE monitorWithSem ---------------------------
+--------------------------- MODULE MonitorWithSem ---------------------------
 (*
 This spec shows a wrong implementation for using semaphore implementing
 monitors.
 *)
 
-EXTENDS Integers, monitor
+EXTENDS FiniteSets, Integers, Monitor
 
 (* Util functions *)
-RECURSIVE SetSize(_)
-SetSize(set) ==
-  IF set = {} THEN 0
-  ELSE LET picked == CHOOSE x \in set : TRUE
-       IN 1 + SetSize(set \ {picked})
-
 RECURSIVE ChooseN(_, _)
 ChooseN(N, set) ==
   IF N < 0 \/ N = 0 \/ set = {} THEN {}
@@ -41,6 +35,12 @@ SemNonNeg ==
 
 SemWaitAfterCVWaitReg ==
    Sem.waiters \subseteq CV.waiters
+
+SemCountConstraintSmall ==
+   Sem.counter < 2
+
+SemCountConstraintLarge ==
+   Sem.counter < 10
 
 VARIABLE WaiterCount
 VARIABLE SignalCount
@@ -80,20 +80,19 @@ LockResolve ==
 Unlock(t) ==
        ~Blocked(t) /\ ~MarkedCVWaiting(t)
     /\ Mutex.holder = {t}
-    /\ Mutex' = [holder |-> {}, waiters |-> Mutex.waiters]
+    /\ Mutex' = UnlockMutex(Mutex)
     /\ UNCHANGED <<CV, Sem, WaiterCount, SignalCount>>
 
 (*
 Wait cannot release lock and wait on sem atomically
 *)
 
-WaitA(t) ==
+Wait(t) ==
        ~Blocked(t) /\ ~MarkedCVWaiting(t)
     /\ Mutex.holder = {t}
     /\ CV' = [ waiters |-> CV.waiters \union {t},
                signaled |-> CV.signaled ]
-    /\ Mutex' = [ holder |-> {},
-                  waiters |-> Mutex.waiters]
+    /\ Mutex' = UnlockMutex(Mutex)
     /\ UNCHANGED<<Sem, SignalCount>>
     /\ WaiterCount' = WaiterCount + 1
 
@@ -103,7 +102,7 @@ not in the set.
 *)
 
 Reduce(set, val) ==
-    IF SetSize(set) = 0 THEN set
+    IF Cardinality(set) = 0 THEN set
     ELSE IF val \in set THEN set \ {val}
          ELSE LET picked == CHOOSE x \in set : TRUE
               IN set \ {picked}
@@ -111,7 +110,7 @@ Reduce(set, val) ==
 Pass through since semaphore count is positive.
 *)
 
-WaitB_fast(t) ==
+Wait_fast_wake(t) ==
        ~Blocked(t)
     /\ Sem.counter > 0
     /\ MarkedCVWaiting(t)
@@ -136,7 +135,7 @@ WaitB_fast(t) ==
 Physically sleep as the count is 0.
 *)
 
-WaitB_sleep(t) ==
+Wait_slow_sleep(t) ==
        ~Blocked(t)
     /\ ~(t \in CV.signaled) /\ MarkedCVWaiting(t)
     /\ Sem.counter = 0
@@ -148,7 +147,7 @@ WaitB_sleep(t) ==
 Wake up from semaphore down.
 *)
 
-WaitB_wake (t) ==
+Wait_slow_wake(t) ==
        ~(t \in Mutex.waiters)
     /\ t \in CV.signaled /\ MarkedCVWaiting(t)
     /\ Sem.counter = 0
@@ -172,9 +171,9 @@ Apply signals for all the threads that the signals were just delivered to:
 *)
 
 ComputeSem(Signaled) ==
-  LET minVal == MinOfTwoInt(SetSize(Sem.waiters), SetSize(Signaled))
+  LET minVal == MinOfTwoInt(Cardinality(Sem.waiters), Cardinality(Signaled))
   IN LET pickedSubSet == ChooseN(minVal, Sem.waiters)
-  IN LET reduced == SetSize(Signaled) - minVal
+  IN LET reduced == Cardinality(Signaled) - minVal
   IN [ counter |-> Sem.counter + reduced,
        waiters |-> Sem.waiters \ pickedSubSet]
 
@@ -205,7 +204,7 @@ Broadcast(t) ==
                signaled |-> CV.signaled \union (CV.waiters \ CV.signaled)]
     /\ Sem' = ComputeSem(CV.waiters \ CV.signaled)
     /\ UNCHANGED <<Mutex, WaiterCount>>
-    /\ SignalCount' = SetSize(CV.waiters)
+    /\ SignalCount' = Cardinality(CV.waiters)
 
 
 (**** The Complete Spec ****)
@@ -214,17 +213,18 @@ MSemNext ==
     LockResolve
     \/ \E t \in THREADS :
        \/ Lock(t)
-       \/ WaitA(t)
-       \/ WaitB_fast(t) \/ WaitB_sleep(t) \/ WaitB_wake(t)
+       \/ Wait(t)
+       \/ Wait_fast_wake(t) \/ Wait_slow_sleep(t) \/ Wait_slow_wake(t)
        \/ Signal(t)
        \/ Broadcast(t)
 
 MSemSpec ==
     MSemInit
     /\ [][MSemNext]_<<CV, Mutex, Sem, SignalCount, WaiterCount>>
+    /\ WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(LockResolve)
     /\ \A t \in THREADS:
-        WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(WaitB_fast(t))
-        /\ WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(WaitB_wake(t))
+        WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(Wait_fast_wake(t))
+        /\ WF_<<CV, Mutex, Sem, SignalCount, WaiterCount>>(Wait_slow_wake(t))
 
 (**** Implementation Specific Invariant ****)
 
@@ -232,10 +232,7 @@ MSemSpecInv ==
     MonitorInv
     /\ SemTypeOK /\ SemNonNeg /\ SemWaitAfterCVWaitReg
     /\ CounterTypeOK
-    /\ WaiterCount = SetSize(CV.waiters)
-    /\ SignalCount = SetSize(CV.signaled)
+    /\ WaiterCount = Cardinality(CV.waiters)
+    /\ SignalCount = Cardinality(CV.signaled)
 
 =============================================================================
-\* Modification History
-\* Last modified Thu Nov 01 00:43:36 PDT 2018 by junlongg
-\* Created Mon Oct 29 00:00:19 PDT 2018 by junlongg

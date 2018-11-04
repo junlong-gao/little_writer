@@ -1,4 +1,4 @@
------------------------------- MODULE monitor ------------------------------
+------------------------------ MODULE Monitor ------------------------------
 
 CONSTANT THREADS (* a set of running threads *)
 
@@ -24,6 +24,9 @@ MutexTypeOK ==
 MutualExclusion ==
       Mutex.holder = {}
    \/ \E t \in THREADS : Mutex.holder = {t}
+
+UnlockMutex(mutex) ==
+   [holder |-> {}, waiters |-> Mutex.waiters]
 
 VARIABLE CV
 CVTypeOK ==
@@ -104,6 +107,3 @@ MonitorInv ==
     /\ MonitorConservative
 
 =============================================================================
-\* Modification History
-\* Last modified Thu Nov 01 00:33:26 PDT 2018 by junlongg
-\* Created Sun Oct 28 16:06:17 PDT 2018 by junlongg
