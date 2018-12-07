@@ -1,4 +1,4 @@
-- docker build -it tla_plus .
+- docker build --network=host -t tla_plus .
 - run the tla toolkit
 
    docker run -w $(pwd) -v $(pwd):$(pwd) -it tla_plus java tla2sany.SANY "$@"
