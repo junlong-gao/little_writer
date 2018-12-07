@@ -26,3 +26,6 @@ RUN mkdir -p $JARS && \
 
 ENV CLASSPATH $JARS/tla
 RUN export CLASSPATH
+
+RUN apt-get update && \
+    apt-get install -y build-essential
