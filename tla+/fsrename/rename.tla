@@ -1,4 +1,4 @@
-------------------------------- MODULE rename -------------------------------
+------------------------------- MODULE Rename -------------------------------
 (* Rename: Transplant a subtree.
 The caller is responsible for making sure the transplant dose not introduce
 loops and/or leak objects.
@@ -22,7 +22,14 @@ and CanRename in the commit phase. Note how CanRename tries its best to verify
 
 EXTENDS TLC, Integers, FiniteSets
 CONSTANT InitTree, Root, Nodes, Threads
-VARIABLE ThreadHoldingLocks, ThreadRequiredLocks, FSTree, Txn
+VARIABLE
+         (* Track the required locks *)
+         ThreadHoldingLocks,
+         ThreadRequiredLocks,
+         (* The fstree *)
+         FSTree,
+         (* Track each thread's pending txn parameters *)
+         Txn
 
 RNTypeOK ==
 (* Validate model parameters: *)
@@ -46,6 +53,10 @@ RNTypeOK ==
                       => Txn[t][1] \in ThreadRequiredLocks[t]
                       /\ Txn[t][2] \in ThreadRequiredLocks[t]
                       /\ Txn[t][3] \in ThreadRequiredLocks[t])
+    /\ (\A t1 \in Threads: \A t2 \in Threads:
+         t1 # t2 =>
+         ThreadHoldingLocks[t1]
+         \intersect ThreadHoldingLocks[t2] = {})
 
 (* Some helper functions *)
 (* Check the graph is loop free and use a bound to limit recursion
@@ -202,8 +213,8 @@ RNConserve ==
      Reachable(Root, node)
 
 RNLoopFree ==
-   ~(\E t1 \in Nodes: \E t2 \in Nodes:
-        t1 # t2
-        /\ (Reachable(t1, t2) /\ Reachable(t2, t1)))
+   ~(\E n1 \in Nodes: \E n2 \in Nodes:
+        n1 # n2
+        /\ (Reachable(n1, n2) /\ Reachable(n2, n1)))
 
 =============================================================================

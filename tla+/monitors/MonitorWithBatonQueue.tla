@@ -86,7 +86,8 @@ BatonConservative ==
       Expression {ThreadLocalBaton[t].waiters : t \in THREADS} is a set of thread
       sets, not a plain thread set, thus it has to be flattened.
    *)
-   /\ FlattenSet({ThreadLocalBaton[t].waiters : t \in THREADS}) \subseteq CV.waiters
+   /\ FlattenSet({ThreadLocalBaton[t].waiters : t \in THREADS})
+         \subseteq CV.waiters
    /\ (\A t \in THREADS:
          ThreadLocalBaton[t].counter > 0 => t \in CV.signaled)
 
@@ -109,7 +110,8 @@ Lock(t) ==
        ~Blocked(t) /\ ~MarkedCVWaiting(t)
     /\ ~(t \in Mutex.holder)
     /\ UNCHANGED<<CV, BatonQ, ThreadLocalBaton>>
-    /\ Mutex' = [ holder |-> Mutex.holder, waiters |-> Mutex.waiters \union {t} ]
+    /\ Mutex' = [ holder |-> Mutex.holder,
+                  waiters |-> Mutex.waiters \union {t} ]
 
 LockResolve ==
       ~(Mutex.waiters = {}) /\ (Mutex.holder = {})
@@ -174,7 +176,10 @@ Signal(t) ==
     /\ LET waiting == Back(BatonQ)
        IN CV'= [ waiters  |-> CV.waiters,
                  signaled |-> CV.signaled \union {waiting} ]
-          /\ ThreadLocalBaton' = [ThreadLocalBaton EXCEPT ![waiting] = BatonSignal(ThreadLocalBaton[waiting]) ]
+          /\ ThreadLocalBaton' =
+             [ThreadLocalBaton
+             EXCEPT
+             ![waiting] = BatonSignal(ThreadLocalBaton[waiting]) ]
           /\ BatonQ' = Pop(BatonQ)
           /\ UNCHANGED<<Mutex>>
 
@@ -196,7 +201,10 @@ MBatonQNext ==
        LockResolve
     \/ \E t \in THREADS :
        \/ Lock(t)
-       \/ Wait(t) \/ Wait_fast_wake(t) \/ Wait_slow_sleep(t) \/ Wait_slow_wake(t)
+       \/ Wait(t)
+       \/ Wait_fast_wake(t)
+       \/ Wait_slow_sleep(t)
+       \/ Wait_slow_wake(t)
        \/ Signal(t)
        \/ Broadcast(t)
 

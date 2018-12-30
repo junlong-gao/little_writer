@@ -1,15 +1,6 @@
-fsrename = rename
+include ../Makefile.include
 
-pwd:=$(shell pwd)
-Docker:=docker run -w $(pwd) -v $(pwd):$(pwd) -it docker.io/jerry1394/tla_plus
-NPROCS:=$(shell $(Docker) grep -c ^processor /proc/cpuinfo)
-
-#TLC2 Version 2.13 of 18 July 2018
-#The model checker (TLC) provides the functionalities of model checking or
-#simulation of TLA+ specifications.
-specParser = $(Docker) java tla2sany.SANY
-modelChecker = $(Docker) java tlc2.TLC -deadlock -workers $(NPROCS)
-tex = $(Docker) java tla2tex.TLA -number -latexCommand pdflatex -shade
+fsrename = Rename
 
 # Note in model checking if some property is violated, the model checker
 # still returns 0, but outputs the violation message with a counter example.
@@ -27,7 +18,3 @@ counter_example: $(fsrename).tla $(fsrename)Small.cfg
 	$(modelChecker) \
 	   $(fsrename)Small.tla \
 	   -config $(fsrename)Small.cfg
-
-.PHONY: clean
-clean:
-	rm -rf *.tex *.pdf *.dvi *.log *.aux states

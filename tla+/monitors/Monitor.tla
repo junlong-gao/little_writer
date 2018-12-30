@@ -2,108 +2,66 @@
 
 CONSTANT THREADS (* a set of running threads *)
 
-(*
-Spec of Mutex and CV.
+VARIABLE ThreadState
+VARIABLE MutexHolder
 
-Mutex is modeled as two sets, first being the holder set and the second
-being the waiter set.
+ThreadStateTypeOK ==
+   ThreadState \in [THREADS -> {"Running", "Blocked", "Signaled"}]
+   
+MutexHolderTypeOK ==
+   MutexHolder = {}
+   \/ \E t \in THREADS: MutexHolder = {t}
+   
+MutexLock(t) ==
+   ThreadState[t] = "Running"
+   /\ MutexHolder = {}
+   /\ MutexHolder' = {t}
+   /\ UNCHANGED<<ThreadState>>
+   
+MutexUnlock(t) ==
+   ThreadState[t] = "Running"
+   /\ MutexHolder = {t}
+   /\ MutexHolder' = {}
+   /\ UNCHANGED<<ThreadState>>
+   
+CVWait(t) ==
+   ThreadState[t] = "Running"
+   /\ MutexHolder = {t}
+   /\ MutexHolder' = {}
+   /\ ThreadState' = [ThreadState EXCEPT ![t] = "Blocked"]
 
-CV is also modeled as two sets, first being the waiters and the second
-being the signaled.
-*)
+CVSignal(t) ==
+   ThreadState[t] = "Running"
+   /\ MutexHolder = {t}
+   /\ (
+      IF \A thr \in THREADS: ThreadState[thr] /= "Blocked"
+      THEN MutexHolder' = {}
+           /\ UNCHANGED<<ThreadState>>
+      ELSE LET blocked == CHOOSE thr \in THREADS : ThreadState[thr] = "Blocked"
+           IN MutexHolder' = {} (* we can do Hoare semantics here *)
+              /\ ThreadState' = [ThreadState EXCEPT ![blocked] = "Signaled"]
+      )
+CVWake(t) ==
+   ThreadState[t] = "Signaled"
+   /\ MutexHolder = {}
+   /\ MutexHolder' = {t}
+   /\ ThreadState' = [ThreadState EXCEPT ![t] = "Running"]
 
-VARIABLE Mutex
-MutexDomain ==
-   DOMAIN Mutex = {"holder", "waiters"}
+MInit == ThreadState = [t \in THREADS |-> "Running"]
+         /\ MutexHolder = {}
 
-MutexTypeOK ==
-   DOMAIN Mutex = {"holder", "waiters"}
-   /\ Mutex.holder \subseteq THREADS
-   /\ Mutex.waiters \subseteq THREADS
+MNext == \E t \in THREADS: CVWait(t) \/ CVSignal(t) \/ CVWake(t) \/ MutexLock(t) \/ MutexUnlock(t)
 
-MutualExclusion ==
-      Mutex.holder = {}
-   \/ \E t \in THREADS : Mutex.holder = {t}
+MSpec == MInit /\ [][MNext]_<<ThreadState, MutexHolder>>
+         /\ (\A t \in THREADS: SF_<<ThreadState, MutexHolder>>(CVWake(t)))
+         /\ (\A t \in THREADS: WF_<<ThreadState, MutexHolder>>(MutexUnlock(t)))
 
-UnlockMutex(mutex) ==
-   [holder |-> {}, waiters |-> Mutex.waiters]
-
-VARIABLE CV
-CVTypeOK ==
-    DOMAIN CV = {"waiters", "signaled"}
-    /\ CV.waiters \subseteq THREADS
-    /\ CV.signaled \subseteq THREADS
-
-CVDomain ==
-    DOMAIN CV = {"waiters", "signaled"}
-
-(*
-Conditional variables are memoryless.  If a thread appears in CV.signaled, it
-must have called CV.Wait() before.  If a thread is not in the wait set, it must
-not appear in the signaled set. i.e. Signalling a not waiting thread has no
-effects for future wait.
-*)
-
-CVMemoryLess ==
-   CV.signaled \subseteq CV.waiters
-
-(*
-Monitors only move threads around, not duplicating them.
-*)
-MonitorConservative ==
-      Mutex.holder \subseteq THREADS
-   /\ Mutex.waiters \subseteq THREADS
-   /\ CV.waiters \subseteq THREADS
-   /\ CV.signaled \subseteq THREADS
-   /\ ( Mutex.waiters \intersect Mutex.holder = {} )
-   /\ ( Mutex.waiters \intersect CV.waiters = {} )
-   /\ ( Mutex.holder \intersect CV.waiters = {} )
-   /\ ( Mutex.waiters \intersect CV.signaled = {} )
-   /\ ( Mutex.holder \intersect CV.signaled = {} )
-
-MarkedCVWaiting(t) ==
-   t \in CV.waiters
-
-(**** Init states ****)
-MInit ==
-        CV = [ waiters |-> {}, signaled |-> {} ]
-     /\ Mutex = [ holder |-> {}, waiters |-> {} ]
-
-(*
-This is a non-trivial safety property for CV wait and signal: for every thread
-that received signal, it must have called Wait() on CV before.
-*)
-
-CVWaitCorrectness ==
-    \A t \in THREADS:
-       (t \in CV'.signaled) => (t \in CV.signaled \/ t \in CV.waiters)
-
-(*
-This is one of the non-trivial liveness property any monitor spec must satisfy.
-If some thread waited and then is signaled, it must eventually wake up and try
-to acquire the lock again.
-
-Monitors provide this fundamental guarantee so that different threads can
-communicate with each other like:
-T1: wait() on some condition
-T2: change the condition and communicate with T1 via signal()/broadcast().
-*)
+MTypeOK == ThreadStateTypeOK \/ MutexHolderTypeOK
 
 CVSignalFairness ==
     \A t \in THREADS:
-        (t \in CV.signaled) ~> (t \in Mutex.waiters)
+        ThreadState[t] = "Signaled" ~> ThreadState[t] = "Running"
 
-(* Temporal Properties to Check *)
-MonitorSafety ==
-   [][CVWaitCorrectness]_<<CV, Mutex>>
-
-MonitorLiveness ==
-    CVSignalFairness
-
-(* Invariants to Check *)
-MonitorInv ==
-       CVDomain /\ CVMemoryLess
-    /\ MutexDomain /\ MutualExclusion
-    /\ MonitorConservative
-
+THEOREM MSpec => MTypeOK /\ CVSignalFairness
+(* Model check: Spec, check Inv MTypeOK and temporal property CVSignalFairness *)
 =============================================================================

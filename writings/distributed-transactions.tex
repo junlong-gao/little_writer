@@ -1,0 +1,119 @@
+\input{format.tex}
+\input{defs.tex}
+
+\begin{document}
+\tableofcontents
+
+\title{Distributed Transactions}
+\maketitle
+
+Atomicity, Consistency, Isolation Levels, and Durability (ACID), are the
+corner stones for the storage system programing interface:
+transactions~\cite{gray1992transaction}. In reality, these promises are
+harder and harder to keep when increasing the scale of the storage
+system~\cite{bailis2013highly}.
+
+Why distributed transactions? We need distribution in storage systems for
+mainly two purposes: scalability of performances and redundancy for
+reliability. In some systems, redundancy requires distributed transactions to
+ensure consistency across replicas, this includes some virtual SAN
+implementation and file systems~\cite{ghemawat2003google}. The form of
+transactions in replication is somewhat simpler: their main purpose is for
+Durability and Atomicity. 
+
+In some other recent architectures, where storage system is implemented with
+two layers\cite{Cooper_2013, cao2018polarfs,weil2006ceph,
+verbitski2017amazon, peng2010large}, replication is pushed down to the lower
+layer and can use other approaches like replicated logs or gossip for
+replication. In these cases, when the entire system storage is sharded for
+scalability, transactions involves multiple resources manager will require
+some form of two-phase commit to implement ACID semantics.
+
+But the boundary of these use-cases is not black-and-white. Imagine
+implementing a virtual SAN system with RAID-6 erasure coding for data
+blocks. There are 4 data nodes and 2 syndrome nodes, and redundancy is
+achieved by contacting any 4 nodes out of the 6 to recover a data
+block~\cite{plank2013erasure}. In this case, is it replication, or sharding?
+Erasure coding works by generating 6 syndrome blocks from the 4 data blocks
+(one coding group), and two-phase commit is used to ensure these 6 pieces of
+data end up all-or-nothing durably on the 6 nodes. On the other handing,
+reading the 4 consecutive blocks in the same coding group can be distributed
+to any 4 of the 6 nodes, so read performance benefits from this distribution.
+There is no obvious replicated state machine approach the author know of to
+achieve this, hence two-phase commit is used.
+
+The discussion gets even further into what kind of programming interface
+these distributed transactions offers. Is it key-value space, or Structured
+Query Language? In traditional MySQL implementation, SQL is done on a b-plus
+tree, which is effectively a key-value storage engine. Now it is interesting
+to see that when implementing a distributed SQL database, it is usually done
+over a thin SQL layer on a distributed key-value storage layer. There is
+a rabbit hole on how journaling should be done in key-value layer and b-plus
+tree layer~\cite{gray1992transaction, sippu2015transaction}.
+
+This article explores the distributed transactions and architectures entails
+in the two-layered approaches.
+
+\section{Physical and Logical Databases}
+In traditional centralized database designs, the system is already in 2
+layers internally. SQL operations always generate key-value operations on the
+b-plus tree, and the b-plus tree is the physical representation of these
+tuples. The physical database, sometimes called ``the storage engine'', is
+physical in a sense that they are closer to disk (b-plus tree pages are
+literally disk pages), and relies on the underlying hardware for page
+atomicity (but no structured update). The logical database relies on the
+storage engine for storing the tuple, yet itself can have its own logging and
+in-memory state like cache. In traditional design, mutation of the database
+is expressed in the logical layer by translating SQL to key-value operations, and
+then translated to the physical structure mutation, and journaled for
+atomicity and durability.
+
+For Google Spanner and Amazon Aurora, this relationship is turned
+``inside-out''~\cite{Cooper_2013, verbitski2017amazon}, in the sense that
+logical mutations are first-class citizens in the data path instead of hidden
+beneath the internal structure. In fact, some open-source implementation like
+TiDB explicitly allows using the underlying logical database TiKV directly.
+In these cases, mutations must first be done in a logical manner:
+key-value operations are logged in the persistent storage, and picked up by
+the physical layer to replay onto the physical database, regardless which
+storage engine it uses. Popular implementations of LSM tree shows its value
+in write-intensive workloads.
+
+\section{Jounraling}
+The two-layered approach can benefit from the underlying key-value store
+being both highly available and highly scalable. Logical journaling allows
+this separation so that one can focus on solving data reliability and
+availability problems in the key-value layer. Also, journaling at the logical
+layer reduces write-amplification dramatically over the
+network~\cite{verbitski2017amazon}. Finally, logical journaling is also
+naturally suitable for consensus protocols implementing replicated logs like
+Raft, provided records in the logical journal are idempotent. In AWS Aurora,
+they have their own implementation of replicated log based on gossip and
+checkpoint progressing~\cite{verbitski2018amazon} (curiously, there is no
+notion of distributed transactions as there is no sharding in Aurora either).
+
+Now it is worth mention the differences in Aurora and the rest of the world.
+Aurora is using a more involved form called Physiological Logging as this is
+what original MySQL uses~\cite{sippu2015transaction}. The log records
+describes how the b-plus tree pages to be mutated in terms of logical
+key-value operations, without providing the entire post-image of the page. In
+this sense, the write path will still have to stick with the traditional
+database design where latches are used to guard pages dirtied without
+sharding to different nodes, and in this case Aurora can only support one
+writer. In this sense, the two layers in Aurora between the logical layer and
+the physical layer are still interleaved.
+
+In Spanner however, transactions are done in the key-value and key-value form
+only, and there is no dependency on the underlying physical database. Writing
+is  a matter of logging the key-value pairs in the Paxos log, and no need to
+handle dirty page latches in a distributed manner. Then, sharding can be done
+in the key space and each shard has a Paxos file for its share of journaling.
+To make sure the update across shards are updated atomically and durability,
+an additional two-phase commit protocol is thus required.
+
+\section{Timestamps and Concurrency}
+\wip{Explain serailibility and linearizability and how timestamps can be used}
+
+\bibliography{main}{}
+\bibliographystyle{plain}
+\end{document}
