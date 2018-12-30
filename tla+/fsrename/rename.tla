@@ -197,22 +197,151 @@ RNTypeOK ==
        ThreadHoldingLocks[t] \subseteq ThreadRequiredLocks[t])
     /\ FSTree \in [Nodes -> SUBSET(Nodes)]
 
-RNInit ==
-   ThreadHoldingLocks = [t \in Threads |-> {}]
-   /\ ThreadRequiredLocks = [t \in Threads |-> {}]
-   /\ FSTree = InitTree
-
 (* Some helper functions *)
 RECURSIVE Reachable(_, _)
 Reachable(rootNode, dstNode) ==
    IF rootNode = dstNode THEN TRUE
    ELSE IF (\E p \in Nodes: dstNode \in FSTree[p]
             /\  Reachable(rootNode, p))
-        THEN TRUE
-        ELSE FALSE
+   THEN TRUE
+   ELSE FALSE
 
+Transplant(srcParent, src, dstParent) ==
+   [node \in Nodes |->
+      IF node = srcParent
+      THEN FSTree[node] \ {src}
+      ELSE IF node = dstParent
+      THEN FSTree[node] \union {src}
+      ELSE FSTree[node]
+   ]
 
+UnlockAll(t) ==
+   [ thr \in Threads |->
+      IF thr = t THEN {}
+      ELSE ThreadHoldingLocks[thr]
+   ]
+
+(* Some helper predicates *)
+IsChild(p, c) ==
+   c \in FSTree[p]
+
+Locked(t, node) ==
+   node \in ThreadHoldingLocks[t]
+
+CanFormCycle(src, dstParent) ==
+   Reachable(src, dstParent)
+
+AllLocked(t) ==
+   ThreadHoldingLocks[t] =
+   ThreadRequiredLocks[t]
+
+ValidRename(srcParent, src, dstParent) ==
+   IsChild(srcParent, src)
+ /\ \lnot CanFormCycle(src, dstParent)
+
+CanRename(t, srcParent, src, dstParent) ==
+   AllLocked(t)
+   /\ srcParent \in ThreadHoldingLocks[t]
+   /\ src \in ThreadHoldingLocks[t]
+   /\ dstParent \in ThreadHoldingLocks[t]
+
+(* A thread is blocking if non of the next lock to
+acquire is free.
+*)
+Blocking(t) ==
+   \A node \in (ThreadRequiredLocks[t] \ ThreadHoldingLocks[t]):
+      (\E thr \in Threads:
+         (thr # t
+         /\ node \in ThreadHoldingLocks[thr]))
+(* Return a non-blocked free lock for thread t.
+Note this function comes in pairs with the above one.
+*)
+PickNonBlocked(t) ==
+   CHOOSE node \in
+      (ThreadRequiredLocks[t] \ ThreadHoldingLocks[t]):
+         (\A thr \in Threads:
+            \lnot (node \in ThreadHoldingLocks[thr]))
+
+(* Init states *)
+RNInit ==
+   ThreadHoldingLocks = [t \in Threads |-> {}]
+   /\ ThreadRequiredLocks = [t \in Threads |-> {}]
+   /\ FSTree = InitTree
+
+(* Next state transitions
+There are 3 of them:
+1. begin txn for the rename
+2. try-lock after transaction begin but not all locks acquired
+3. commit txn to mutate the fs tree
+*)
+BeginRenameTxn(t, srcParent, src, dstParent) ==
+   (* Enabling conditions *)
+   ThreadHoldingLocks[t] = {}
+   /\ ThreadRequiredLocks[t] = {}
+   /\ ValidRename(srcParent, src, dstParent)
+
+   (* Next state *)
+   /\ FSTree' = FSTree
+   /\ ThreadHoldingLocks' = ThreadHoldingLocks
+   /\ ThreadRequiredLocks' =
+      [ThreadRequiredLocks
+         EXCEPT ![t] = {srcParent, src, dstParent}]
+
+CommitRenameTxn(t, srcParent, src, dstParent) ==
+   (* Enabling conditions *)
+   CanRename(t, srcParent, src, dstParent)
+
+   (* Next state:
+      Atomically perform the rename with lock held and release the
+      locks.
+   *)
+   /\ FSTree' = Transplant(srcParent, src, dstParent)
+   /\ ThreadHoldingLocks' = UnlockAll(t)
+   /\ ThreadRequiredLocks' =
+       [ thr \in Threads |->
+          IF thr = t THEN {}
+          ELSE ThreadRequiredLocks[thr]
+       ]
+
+TryLock(t) ==
+   (* Enabling conditions *)
+   \lnot AllLocked(t)
+   (* Next state:
+      Depending on if it is blocking or not
+      If it is blocking, then release all the locks and retry
+      else make a progress by picking a non-blocked one.
+    *)
+    /\ FSTree' = FSTree
+    /\ ThreadRequiredLocks' = ThreadRequiredLocks
+    /\ ( ThreadHoldingLocks' =
+    IF Blocking(t) THEN UnlockAll(t)
+    ELSE [ThreadHoldingLocks
+            EXCEPT ![t] =
+            PickNonBlocked(t) \union ThreadHoldingLocks[t]
+         ]
+    )
+
+RNNext ==
+  (\E t \in Threads: \E srcParent, src, dstParent \in Nodes:
+     BeginRenameTxn(t, srcParent, src, dstParent))
+  \/ (\E t \in Threads: TryLock(t))
+  \/ (\E t \in Threads: \E srcParent, src, dstParent \in Nodes:
+     CommitRenameTxn(t, srcParent, src, dstParent))
+
+(* The complete spec *)
+RNSpec ==
+   RNInit
+   /\ [][RNNext]_<<ThreadHoldingLocks, ThreadRequiredLocks, FSTree>>
+   /\ (\A t \in Threads:
+       WF_<<ThreadHoldingLocks, ThreadRequiredLocks, FSTree>>(t))
+
+(* Invariants *)
+(* The only temporal property we would like to check is a state invariant:
+*)
+RNSafe ==
+   \A node \in Nodes:
+     Reachable(Root, node)
 =============================================================================
 \* Modification History
-\* Last modified Sat Dec 29 18:52:51 PST 2018 by junlongg
+\* Last modified Sat Dec 29 20:00:18 PST 2018 by junlongg
 \* Created Sat Dec 29 15:04:06 PST 2018 by junlongg
