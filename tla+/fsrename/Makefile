@@ -2,7 +2,7 @@ fsrename = rename
 
 pwd:=$(shell pwd)
 Docker:=docker run -w $(pwd) -v $(pwd):$(pwd) -it docker.io/jerry1394/tla_plus
-NPROCS:=$(shell docker run docker.io/jerry1394/tla_plus grep -c ^processor /proc/cpuinfo)
+NPROCS:=$(shell $(Docker) grep -c ^processor /proc/cpuinfo)
 
 #TLC2 Version 2.13 of 18 July 2018
 #The model checker (TLC) provides the functionalities of model checking or
