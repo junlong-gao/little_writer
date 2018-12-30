@@ -1,21 +1,22 @@
 ------------------------------- MODULE rename -------------------------------
-(*
-Rename: Transplant a subtree.
-The caller is responsible for making sure the transplant dose
-not introduce loops and/or leak objects.
+(* Rename: Transplant a subtree.
+The caller is responsible for making sure the transplant dose not introduce
+loops and/or leak objects.
 
-The model only concerns Rename(srcParent, src, dstParent), that
-is, no new name in dstParent.
+The model only concerns Rename(srcParent, src, dstParent), that is, no new name
+in dstParent.
 
-This model demostrates a wrong implementation.
+This model demonstrates a wrong implementation.
 
-The problem is thus apparent: by the time the remote file server
-receives this request, the tree topology may have changed so that
-the loop can be introduced due to this rename.
-This is can be easilyseen by comparing the ValidRename used in
-pre-txn phase and CanRename in the commit phase. Note how CanRename
-tries its best to verify "everything is right" after try-lock.
+The problem is thus apparent: by the time the remote file server receives this
+request, the tree topology may have changed so that the loop can be introduced
+due to this rename.
+This is can be easily seen by comparing the ValidRename used in pre-txn phase
+and CanRename in the commit phase. Note how CanRename tries its best to verify
+"everything is right" after try-lock.
 *)
+
+
 EXTENDS TLC, Integers, FiniteSets
 CONSTANT InitTree, Root, Nodes, Threads
 VARIABLE ThreadHoldingLocks, ThreadRequiredLocks, FSTree, Txn
@@ -44,8 +45,7 @@ RNTypeOK ==
                       /\ Txn[t][3] \in ThreadRequiredLocks[t])
 
 (* Some helper functions *)
-(*
-Check the graph is loop free and use a bound to limit recursion
+(* Check the graph is loop free and use a bound to limit recursion
 depth. For a tree of n nodes, any path cannot be longer than n - 1.
 *)
 RECURSIVE ReachableInt(_, _, _)
@@ -97,8 +97,7 @@ CanRename(t, srcParent, src, dstParent) ==
    (* before commit, "make sure everything is right" *)
    /\ IsChild(srcParent, src)
 
-(* A thread is blocking if non of the next lock to
-acquire is free.
+(* A thread is blocking if non of the next lock to acquire is free.
 *)
 Blocking(t) ==
    \A node \in (ThreadRequiredLocks[t] \ ThreadHoldingLocks[t]):
