@@ -87,7 +87,7 @@ C2) Reachability.
    and after each rename operation. Duration the rename it may not be tree.
 C3) Progress.
    If a rename started, it must eventually complete or fail because of the
-   enabling condition is invalidated.
+   enabling condition is invalidated. (do not check it)
 C4) Race-free.
    It is impossible to have two threads accessing the same tree node
    concurrently, where at least one of them is write.
@@ -117,8 +117,102 @@ S3. Transplant phase.
 
 ...And then we will see C2 is violated.
 
+#States:
+## Model Parameters:
+- The initial tree
+A tree is simply a graph with root:
+Root: T
+Nodes: {A, B, C, D, E, F, T}
+Graph:{
+T:{A, B},
+A:{C},
+C:{E},
+B:{D},
+D:{F},
+}
+- The threads
+{t1, t2}
+
+##Variables:
+- The current tree.
+(incidentally, root cannot change.)
+init: input graph
+
+- the locks held by each thread
+{
+t1 -> {A, C, E}
+t2 -> {}
+}
+init: {t1->{}, t2->{}}
+- the locks required by each thread:
+{
+t1 -> {A, C, E}
+t2 -> {}
+}
+init: {t1->{}, t2->{}}
+- perhaps more bookkeeping states.
+?
+
+#Helpers
+Reachability(node):
+  rec if node is T, true
+      else if there exists p such that
+           p is a parent of node and Reachability(p), then true
+           else false
+
+Transplant(srcParent, srcObj, dstParent):
+   # modify the current tree and return a new tree
+
+How to model try lock?
+Enabling condition: t.held != t.required.
+next state:
+if any of the lock in t.required \ t.held is in some other t's held, release
+all locks
+else acquire t.held = t.required
+Note this modeling will result in liveness issue in (C3). But it will not have
+any correctness issue.
+
+Then the enabling condition for rename is simple
+1. all required locks are held
+2. the source dst follows the constraint
+the use Transplant to update the tree.
+
+Start simple, and refine the model.
 *)
+
+CONSTANT InitTree, Root, Nodes, Threads
+VARIABLE ThreadHoldingLocks, ThreadRequiredLocks, FSTree
+
+RNTypeOK ==
+(* Validate model parameters: *)
+       Root \in Nodes
+    /\ InitTree \in [Nodes -> SUBSET(Nodes)]
+(* Validate runtime variables: *)
+    /\ ThreadHoldingLocks \in
+         [Threads -> SUBSET(Nodes)]
+    /\ ThreadRequiredLocks \in
+         [Threads -> SUBSET(Nodes)]
+    (* each thread is either try-locking or got all the required locks: *)
+    /\ (\A t \in Threads:
+       ThreadHoldingLocks[t] \subseteq ThreadRequiredLocks[t])
+    /\ FSTree \in [Nodes -> SUBSET(Nodes)]
+
+RNInit ==
+   ThreadHoldingLocks = [t \in Threads |-> {}]
+   /\ ThreadRequiredLocks = [t \in Threads |-> {}]
+   /\ FSTree = InitTree
+
+(* Some helper functions *)
+RECURSIVE Reachable(_, _)
+Reachable(rootNode, dstNode) ==
+   IF rootNode = dstNode THEN TRUE
+   ELSE IF (\E p \in Nodes: dstNode \in FSTree[p]
+            /\  Reachable(rootNode, p))
+        THEN TRUE
+        ELSE FALSE
+
+
 =============================================================================
 \* Modification History
-\* Last modified Sat Dec 29 15:11:37 PST 2018 by junlongg
+\* Last modified Sat Dec 29 18:52:51 PST 2018 by junlongg
 \* Created Sat Dec 29 15:04:06 PST 2018 by junlongg
