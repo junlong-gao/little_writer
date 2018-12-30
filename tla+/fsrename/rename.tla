@@ -8,6 +8,9 @@ in dstParent.
 
 This model demonstrates a wrong implementation.
 
+XXX TODO: Check race-free. Before commit, each thread must have locked all the
+nodes used for the transaction.
+
 The problem is thus apparent: by the time the remote file server receives this
 request, the tree topology may have changed so that the loop can be introduced
 due to this rename.

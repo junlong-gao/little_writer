@@ -29,3 +29,5 @@ RUN export CLASSPATH
 
 RUN apt-get update && \
     apt-get install -y build-essential
+
+RUN apt-get install texlive -y
