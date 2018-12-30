@@ -1,5 +1,21 @@
 ------------------------------- MODULE rename -------------------------------
-(* Rename: Transplant a subtree.  *)
+(*
+Rename: Transplant a subtree.
+The caller is responsible for making sure the transplant dose
+not introduce loops and/or leak objects.
+
+The model only concerns Rename(srcParent, src, dstParent), that
+is, no new name in dstParent.
+
+This model demostrates a wrong implementation.
+
+The problem is thus apparent: by the time the remote file server
+receives this request, the tree topology may have changed so that
+the loop can be introduced due to this rename.
+This is can be easilyseen by comparing the ValidRename used in
+pre-txn phase and CanRename in the commit phase. Note how CanRename
+tries its best to verify "everything is right" after try-lock.
+*)
 EXTENDS TLC, Integers, FiniteSets
 CONSTANT InitTree, Root, Nodes, Threads
 VARIABLE ThreadHoldingLocks, ThreadRequiredLocks, FSTree, Txn
@@ -28,8 +44,10 @@ RNTypeOK ==
                       /\ Txn[t][3] \in ThreadRequiredLocks[t])
 
 (* Some helper functions *)
-(* check the graph is loop free and
-there is a path from rootNode to dstNode *)
+(*
+Check the graph is loop free and use a bound to limit recursion
+depth. For a tree of n nodes, any path cannot be longer than n - 1.
+*)
 RECURSIVE ReachableInt(_, _, _)
 ReachableInt(rootNode, dstNode, bound) ==
    IF bound = 0 THEN FALSE
@@ -69,13 +87,14 @@ AllLocked(t) ==
    ThreadRequiredLocks[t]
 
 ValidRename(srcParent, src, dstParent) ==
-   (~(src \in FSTree[dstParent])) (* this limitation constraints the model...*)
+   (~(src \in FSTree[dstParent]))
  /\ IsChild(srcParent, src)
  /\ (~Reachable(src, dstParent))
 
 CanRename(t, srcParent, src, dstParent) ==
    ThreadRequiredLocks[t] # {}
    /\ AllLocked(t)
+   (* before commit, "make sure everything is right" *)
    /\ IsChild(srcParent, src)
 
 (* A thread is blocking if non of the next lock to
@@ -176,8 +195,6 @@ RNSpec ==
        WF_State(t))
 
 (* Invariants *)
-(* The only temporal property we would like to check is a state invariant:
-*)
 RNConserve ==
    \A node \in Nodes:
      Reachable(Root, node)
@@ -188,6 +205,3 @@ RNLoopFree ==
         /\ (Reachable(t1, t2) /\ Reachable(t2, t1)))
 
 =============================================================================
-\* Modification History
-\* Last modified Sun Dec 30 00:11:41 PST 2018 by junlongg
-\* Created Sat Dec 29 15:04:06 PST 2018 by junlongg
