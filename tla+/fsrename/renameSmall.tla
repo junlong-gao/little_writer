@@ -1,5 +1,5 @@
----- MODULE renameSmall ----
-EXTENDS rename, TLC
+---- MODULE RenameSmall ----
+EXTENDS Rename, TLC
 
 
 InitTreeMV ==

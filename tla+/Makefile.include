@@ -1,0 +1,12 @@
+PWD:=$(shell pwd)
+DOCKER:=docker run -w $(PWD) -v $(PWD):$(PWD) -it \
+	docker.io/jerry1394/tla_plus
+NPROCS:=$(shell $(DOCKER) grep -c ^processor /proc/cpuinfo)
+
+specParser = $(DOCKER) java tla2sany.SANY
+modelChecker = $(DOCKER) java tlc2.TLC -deadlock -workers $(NPROCS)
+tex = $(DOCKER) java tla2tex.TLA -number -latexCommand pdflatex -shade
+
+.PHONY: clean
+clean:
+	rm -rf *.tex *.pdf *.dvi *.log *.aux states

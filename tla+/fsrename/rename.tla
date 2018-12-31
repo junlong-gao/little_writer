@@ -1,4 +1,4 @@
-------------------------------- MODULE rename -------------------------------
+------------------------------- MODULE Rename -------------------------------
 (* Rename: Transplant a subtree.
 The caller is responsible for making sure the transplant dose not introduce
 loops and/or leak objects.
