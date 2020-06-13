@@ -6,17 +6,11 @@
 \usetikzlibrary{positioning}
 
 \usepackage{hyperref}
-\hypersetup{
-    colorlinks,
-    citecolor=black,
-    filecolor=black,
-    linkcolor=black,
-    urlcolor=black
-}
 
 \usepackage{bookmark}
 \usepackage{cite}
 \usepackage{fancyhdr}
+\usepackage{pifont}
 
 \usepackage[margin=1.13in]{geometry}
 
@@ -24,6 +18,10 @@
 \fancyhf{}
 \rhead{\rightmark}
 
-\usepackage{titlesec}
-\titleformat{\chapter}[display]
-  {\normalfont\bfseries}{}{0pt}{\Huge}
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\thesection.\Roman{subsection}}
+
+\renewcommand{\familydefault}{\rmdefault}
+\renewcommand{\rmdefault}{bch}
+
+\renewcommand{\baselinestretch}{1.2}

@@ -13,7 +13,7 @@ replication posses challenges to maintain an illusion of ``single-copy''.
 Under the standard fail-stop model, there is a limit where we cannot achieve
 all three of \Lconsistent, availability, and partition tolerance. Despite the
 impossibility, a class of quorum-based consensus protocols are widely adopted
-in practise to implement a replicated log~\cite{lampson1996build}, which in
+in practice to implement a replicated log~\cite{lampson1996build}, which in
 term allow us to build replicated state machines as a form of redundancy.
 This small article explores some consensus protocols as well as how data
 services are built on top of these replicated logs.
@@ -66,15 +66,15 @@ the other hand, if there is a sequence number associated with the
 eariler sequence number is ignored.
 
 Retrying idempotent but not exactly-once operations over a central server can
-result in at least 2 anormalies in terms of linearizability: one is
+result in at least 2 anomalies in terms of linearizability: one is
 ``resurrected write'', and another being ``out-of-order writes''. Figure
 \ref{fig:M1} gives an example of resurrected write: the history is not
-linearaizable as the write from $P_1$ is retryed and ``resurrected'' and
+linearaizable as the write from $P_1$ is retried and ``resurrected'' and
 observed. There is no way to find a linearaization point for $W(1)$ in its
 request response pair as it has to be before the first observable state
 $R(1)$, then after $W(2)$ the history contracts the second $R(1)$ in $P_2$.
 
-The second anormaly ``out-of-order writes'' happens when 2 clients retries
+The second anomaly ``out-of-order writes'' happens when 2 clients retries
 their writes in the different order as they are observed when they are first
 serialized in the server. \wip{ add a graph here}
 
@@ -183,7 +183,7 @@ serialized in the server. \wip{ add a graph here}
 \section{State Machine \LConsistent}\label{sml}
 How should read and write be executed on the replicated log?
 With replication which of the replica can execute mutation and propagate to
-all the remaining nodes? Which of the replica can serve readng of the state
+all the remaining nodes? Which of the replica can serve read of the state
 machine? To provide high availability, the client may pick a different
 replica for accessing the state machine.
 
