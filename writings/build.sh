@@ -14,8 +14,5 @@ for proj in "filesystems" \
             "distributed-transactions" \
             "storage-engines-and-rum-conjecture" \
     ;do
-    build $proj &
+    build $proj
 done
-
-wait
-git add *.pdf
